@@ -66,9 +66,11 @@ A fronteira do projeto é **política, não uma barreira de kernel**:
 - Checkpoints deixam você *recuperar* (`/rollback`), não *impedir*.
 - `hb-auto` (`off`) remove o último gate de aprovação — só repos confiáveis.
 
-Este é o teto prático **sem root/proot** no Termux (user namespaces
-desabilitados). Para isolamento real de sistema de arquivos seria preciso
-container/namespace (root ou userns) — fora do escopo aqui.
+Este é o teto prático **sem root/proot** (ex.: no Termux, onde user namespaces
+estão desligados). Em um PC Linux/macOS normal você pode ir além e usar
+container/namespace real para isolamento de sistema de arquivos — fora do
+escopo desta skill, mas compatível. Para isolamento real seria preciso
+container/namespace (root ou userns).
 
 ## Estrutura
 
