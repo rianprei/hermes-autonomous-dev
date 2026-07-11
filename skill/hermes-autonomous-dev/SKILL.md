@@ -12,50 +12,50 @@ metadata:
     category: development
 ---
 
-# Hermes Autonomous Development
+# Desenvolvimento Autônomo no Hermes
 
-Termux-native, NO root, NO proot. Equivalent to Claude Code
-"--dangerously-skip-permissions + project boundary" using Hermes-native
-mechanisms only.
+Termux nativo, SEM root, SEM proot. Equivalente ao
+"--dangerously-skip-permissions + project boundary" do Claude Code usando
+apenas mecanismos nativos do Hermes.
 
-## Purpose
-Operate Hermes as an autonomous coding agent inside a repo: it works without
-asking for confirmation, but cannot leave the project, and any mistake is
-reversible via checkpoints.
+## Propósito
+Operar o Hermes como agente de desenvolvimento autônomo dentro de um repo:
+trabalha sem pedir confirmação, mas não consegue sair do projeto, e qualquer
+erro é reversível via checkpoints.
 
-## Quick workflow
-- `hb`        → daily development (`approvals.mode: smart`)
-- `hb-auto`   → no-approval mode (`off`) — trusted repos only
-- `hb-prod`   → conservative production (`smart` + whitelist + branch mandatory)
-- `hb doctor` → health check of the setup
-- `hb audit`  → last-session summary (state.db)
-- `hb-install` → reproduce the environment (clone / bundle / from)
+## Fluxo rápido
+- `hb`        → desenvolvimento diário (`approvals.mode: smart`)
+- `hb-auto`   → modo sem aprovação (`off`) — só repos confiáveis
+- `hb-prod`   → produção conservadora (`smart` + whitelist + branch obrigatória)
+- `hb doctor` → verificação de saúde do setup
+- `hb audit`  → resumo da última sessão (state.db)
+- `hb-install` → reproduz o ambiente (clone / bundle / from)
 
-## How it maps to native Hermes
-- **No prompts:** `approvals.mode` (`smart` | `off`) per profile.
-- **Boundary:** `.hermes.md` at repo root, auto-loaded (first-match, git root).
-- **Rollback:** `checkpoints.enabled: true`; recover with `/rollback [N]`.
-- **Isolation:** each mode is a separate profile under `~/.hermes/profiles/`.
+## Como mapeia para o Hermes nativo
+- **Sem prompts:** `approvals.mode` (`smart` | `off`) por perfil.
+- **Fronteira:** `.hermes.md` na raiz do repo, auto-carregado (first-match, git root).
+- **Rollback:** `checkpoints.enabled: true`; recupere com `/rollback [N]`.
+- **Isolamento:** cada modo é um profile separado em `~/.hermes/profiles/`.
 
-## Load references when needed
-- `references/wrappers.md` — full `hb` / `hb-auto` / `hb-prod` / `hb-audit` / `hb-install` source + behavior.
-- `references/autonomous-config-example.yaml` — profile config examples.
-- `references/security-model.md` — why boundary is policy (not kernel) + limits.
-- `references/troubleshooting.md` — common failures and fixes.
+## Carregue as referências quando precisar
+- `references/wrappers.md` — código/fonte dos wrappers.
+- `references/autonomous-config-example.yaml` — exemplos de config de profile.
+- `references/security-model.md` — por que a fronteira é política (não kernel) + limites.
+- `references/troubleshooting.md` — falhas comuns e correções.
 
-## Templates (copy into a repo)
-- `templates/AGENTS.md`  — short per-project pointer to this skill.
-- `templates/.hermes.md` — generic project boundary rules.
-- `templates/production.md` — strict production rules (for `hb -s production`).
+## Templates (copie para um repo)
+- `templates/AGENTS.template.md`  — ponte curta para esta skill.
+- `templates/.hermes.md` — regras genéricas de fronteira.
+- `templates/production.md` — regras strict de produção (para `hb -s production`).
 
-## Reproduce elsewhere
+## Reproduza em outra máquina
 ```bash
-hb-install --bundle                 # on source: makes ~/.hermes/hb-bundle.tar.gz
-hb-install --from /path/hb-bundle.tar.gz   # on target: rebuilds everything
+hb-install --bundle                 # na origem: cria ~/.hermes/hb-bundle.tar.gz
+hb-install --from /path/hb-bundle.tar.gz   # no destino: reconstrói tudo
 ```
 
-## Critical rules (always)
-- Never edit main/master directly — create a feature branch first.
-- Checkpoints are ON — recover with `/rollback` or `git stash pop`.
-- Do NOT use root/proot solutions (device constraint).
-- `hb-auto` (`off`) removes the approval gate — trusted repos only.
+## Regras críticas (sempre)
+- Nunca edite main/master direto — crie uma branch de feature primeiro.
+- Checkpoints estão ON — recupere com `/rollback` ou `git stash pop`.
+- NÃO use soluções root/proot (restrição do dispositivo).
+- `hb-auto` (`off`) remove o gate de aprovação — só repos confiáveis.

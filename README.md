@@ -1,71 +1,72 @@
 # Hermes Autonomous Dev Kit (v1.0.0)
 
-Equivalent to Claude Code's "skip permissions + project boundary" for
-**Hermes Agent** — built only with native Hermes mechanisms. Termux-native,
-**NO root, NO proot**.
+Equivalente ao "skip permissions + project boundary" do Claude Code para o
+**Hermes Agent** — construído usando apenas mecanismos nativos do Hermes.
+Termux nativo, **SEM root, SEM proot**.
 
-## What it gives you
+## O que ele oferece
 
-| Command   | Hermes mode | Use                                |
-|-----------|-------------|------------------------------------|
-| `hb`      | `smart`     | daily autonomous development       |
-| `hb-auto` | `off`       | no-approval mode (trusted repos)  |
-| `hb-prod` | `smart`+    | conservative production workflow  |
-| `hb doctor` | —         | health check of the setup         |
-| `hb audit`  | —         | last-session summary (state.db)   |
-| `hb-install`| —         | reproduce the environment         |
+| Comando     | Modo Hermes | Uso                                |
+|-------------|-------------|------------------------------------|
+| `hb`        | `smart`     | desenvolvimento autônomo diário    |
+| `hb-auto`   | `off`       | modo sem aprovação (repos confiáveis)|
+| `hb-prod`   | `smart`+    | fluxo de produção conservador      |
+| `hb doctor` | —           | verificação de saúde do ambiente   |
+| `hb audit`  | —           | resumo da última sessão (state.db) |
+| `hb-install`| —           | reproduz o ambiente                |
 
-- **No permission prompts** → `approvals.mode` (`smart`/`off`) per profile.
-- **Project boundary** → `.hermes.md` auto-loaded inside the repo.
-- **Rollback** → Hermes checkpoints (`/rollback [N]`) + git stash.
-- **Per-stack context** → `python` / `javascript` / `rust` / `android` / `production`.
+- **Sem prompts de aprovação** → `approvals.mode` (`smart`/`off`) por perfil.
+- **Fronteira do projeto** → `.hermes.md` carregado automaticamente dentro do repo.
+- **Rollback** → checkpoints do Hermes (`/rollback [N]`) + git stash.
+- **Contexto por stack** → `python` / `javascript` / `rust` / `android` / `production`.
 
-## Install
+## Instalação
 
 ```bash
-# From the repo
+# A partir do repositório
 hb-install --from releases/hb-bundle-v1.0.0.tar.gz
-# …or from a portable bundle
+# …ou a partir de um bundle portátil
 hb-install --from hb-bundle.tar.gz
 
-hb doctor          # verify
-cd /your/project
-hb                 # first run seeds .hermes.md — review, then re-run
+hb doctor          # verifica
+cd /seu/projeto
+hb                 # 1ª execução cria o .hermes.md — revise, depois rode de novo
 ```
 
-See `skill/hermes-autonomous-dev/INSTALL.md` for the full guide and
-`skill/hermes-autonomous-dev/SKILL.md` for the operating manual.
+Veja `skill/hermes-autonomous-dev/INSTALL.md` para o guia completo e
+`skill/hermes-autonomous-dev/SKILL.md` para o manual operacional.
 
-## Reproduce on another machine
+## Reproduzir em outra máquina
 
 ```bash
-hb-install --bundle        # creates ~/.hermes/hb-bundle.tar.gz
-# copy hb-bundle.tar.gz to the new machine, then:
+hb-install --bundle        # cria ~/.hermes/hb-bundle.tar.gz
+# copie hb-bundle.tar.gz para a nova máquina, depois:
 hb-install --from hb-bundle.tar.gz
 ```
 
-## Security model (read this)
+## Modelo de segurança (leia isto)
 
-The project boundary is **policy, not a kernel barrier**:
-- `.hermes.md` instructs the model to stay inside the repo.
-- Checkpoints let you *recover* (`/rollback`), not *prevent*.
-- `hb-auto` (`off`) removes the last approval gate — trusted repos only.
+A fronteira do projeto é **política, não uma barreira de kernel**:
 
-This is the practical ceiling **without root/proot** on Termux (user
-namespaces are disabled). For real filesystem isolation you would need a
-container/namespace (root or userns) — out of scope here.
+- `.hermes.md` instrui o modelo a permanecer dentro do repo.
+- Checkpoints deixam você *recuperar* (`/rollback`), não *impedir*.
+- `hb-auto` (`off`) remove o último gate de aprovação — só repos confiáveis.
 
-## Layout
+Este é o teto prático **sem root/proot** no Termux (user namespaces
+desabilitados). Para isolamento real de sistema de arquivos seria preciso
+container/namespace (root ou userns) — fora do escopo aqui.
+
+## Estrutura
 
 ```
-skill/hermes-autonomous-dev/   the Hermes skill (SKILL.md + references/templates/scripts)
+skill/hermes-autonomous-dev/   a skill do Hermes (SKILL.md + references/templates/scripts)
 profiles/                     autonomous, autonomous-prod, autonomous-yolo (config.yaml)
-stacks/                       per-language boundary rules
+stacks/                       regras de fronteira por linguagem
 wrappers/                     hb, hb-auto, hb-prod, hb-audit, hb-install
 releases/                     hb-bundle-v1.0.0.tar.gz (+ .sha256)
-manifest.yaml                 component manifest
+manifest.yaml                 manifesto de componentes
 ```
 
-## License
+## Licença
 
-MIT — see `LICENSE`.
+MIT — veja `LICENSE`.

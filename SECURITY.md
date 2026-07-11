@@ -1,56 +1,56 @@
-# Security
+# Segurança
 
-This document states, explicitly, what the Hermes Autonomous Dev Kit
-protects against and what it does **not** protect against. Read it before
-using `hb-auto`.
+Este documento declara, explicitamente, contra o que o Hermes Autonomous Dev
+Kit protege e contra o que **não** protege. Leia antes de usar o `hb-auto`.
 
-## What it protects against
+## Contra o que protege
 
-- **Working in the wrong directory** — `hb` requires a git repo and prints a
-  confirmation summary (project / mode / profile / checkpoints / boundary)
-  before starting.
-- **Obvious destructive commands** — `.hermes.md` forbids `rm -rf /`, `git
-  push --force`, `git reset --hard HEAD`, `dd`, `mkfs`, `shutdown`, `reboot`,
-  `DROP DATABASE`, etc.
-- **Losing changes** — Hermes checkpoints (`/rollback [N]`) plus a git stash
-  created by `hb` before each session. Both are reversible.
-- **Code regression** — `hb-prod` enforces a dedicated feature branch and
-  prohibits automatic dependency installs.
-- **Unintended approval prompts fatigue** — `hb` uses `approvals.mode:
-  smart` (auto-approves low-risk, prompts on high-risk).
+- **Trabalhar no diretório errado** — o `hb` exige um repo git e imprime um
+  resumo de confirmação (projeto / modo / perfil / checkpoints / fronteira)
+  antes de iniciar.
+- **Comandos destrutivos óbvios** — o `.hermes.md` proíbe `rm -rf /`,
+  `git push --force`, `git reset --hard HEAD`, `dd`, `mkfs`, `shutdown`,
+  `reboot`, `DROP DATABASE`, etc.
+- **Perda de mudanças** — checkpoints do Hermes (`/rollback [N]`) mais um git
+  stash criado pelo `hb` antes de cada sessão. Ambos são reversíveis.
+- **Regressão de código** — o `hb-prod` exige uma branch de feature dedicada e
+  proíbe instalação automática de dependências.
+- **Fadiga de aprovação** — o `hb` usa `approvals.mode: smart` (auto-aprova
+  risco baixo, pede em risco alto).
 
-## What it does NOT protect against
+## Contra o que NÃO protege
 
-- **Kernel-level isolation** — there is **no container, namespace, or
-  syscall filter**. The boundary is a *policy* (`.hermes.md` instructions to
-  the model), not an OS barrier. This is the ceiling **without root/proot**
-  on Termux (user namespaces are disabled: `unshare --map-root-user` fails).
-- **A model that ignores instructions** — if the model decides to act
-  outside the repo, the OS will not stop it. Rollback recovers state; it
-  does not prevent the action.
-- **Malicious dependency you approve** — `hb`/`hb-prod` can install deps via
-  the repo's package manager; a malicious package you authorize will run.
-- **Malicious external script you run consciously** — any script you ask the
-  agent to execute will execute.
-- **Ambiguous instruction misinterpretation** — a vaguely worded request can
-  be carried out differently than intended. Prefer explicit, narrow prompts.
+- **Isolamento em nível de kernel** — **não há** container, namespace ou
+  filtro de syscall. A fronteira é uma *política* (instruções `.hermes.md` ao
+  modelo), não uma barreira do SO. Este é o teto **sem root/proot** no Termux
+  (user namespaces desabilitados: `unshare --map-root-user` falha).
+- **Modelo que ignora instruções** — se o modelo decidir agir fora do repo, o
+  SO não o impedirá. O rollback recupera o estado; não previne a ação.
+- **Dependência maliciosa que você aprova** — `hb`/`hb-prod` podem instalar
+  deps via o gerenciador do repo; um pacote malicioso que você autorizar vai
+  executar.
+- **Script externo malicioso executado conscientemente** — qualquer script que
+  você pedir ao agente para rodar será executado.
+- **Má interpretação de instrução ambígua** — um pedido vago pode ser
+  executado de forma diferente do pretendido. Prefira prompts explícitos e
+  estreitos.
 
-## Modes — trust level
+## Modos — nível de confiança
 
-| Mode       | `approvals.mode` | Gate | Use case                    |
+| Modo       | `approvals.mode` | Gate | Caso de uso                 |
 |------------|------------------|------|-----------------------------|
-| `hb`       | `smart`          | yes  | daily development            |
-| `hb-auto`  | `off`            | **no** | trusted repos ONLY         |
-| `hb-prod`  | `smart` + whitelist | yes | production / sensitive code |
+| `hb`       | `smart`          | sim  | desenvolvimento diário       |
+| `hb-auto`  | `off`            | **não** | **só** repos confiáveis  |
+| `hb-prod`  | `smart` + whitelist | sim | produção / código sensível |
 
-`hb-auto` removes the last approval gate. **Only use it on repositories you
-control and have backed up.** It is not a default.
+O `hb-auto` remove o último gate de aprovação. **Use apenas em repositórios
+que você controla e tem backup.** Não é o padrão.
 
-## Recommendations
+## Recomendações
 
-1. Default to `hb`. Reserve `hb-auto` for throwaway or fully backed-up repos.
-2. Always create a feature branch before large changes (`hb-prod` enforces this).
-3. Run `hb doctor` after any environment change.
-4. Verify bundle integrity with the published SHA256 before installing:
+1. Use `hb` por padrão. Reserve `hb-auto` para repos descartáveis ou com backup.
+2. Sempre crie uma branch de feature antes de grandes mudanças (`hb-prod` obriga).
+3. Rode `hb doctor` após qualquer mudança de ambiente.
+4. Verifique a integridade do bundle com o SHA256 publicado antes de instalar:
    `sha256sum -c releases/hb-bundle-v1.0.0.sha256`.
-5. Remember: this is a **safe workflow**, not a sandbox.
+5. Lembre-se: isto é um **workflow seguro**, não uma sandbox.

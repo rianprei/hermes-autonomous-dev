@@ -1,49 +1,49 @@
-# Hermes Autonomous Dev — Install
+# Hermes Autonomous Dev — Instalação
 
-Equivalent to Claude Code "skip permissions + project boundary", Termux-native,
-NO root, NO proot. Uses only native Hermes mechanisms.
+Equivalente ao "skip permissions + project boundary" do Claude Code, Termux
+nativo, SEM root, SEM proot. Usa apenas mecanismos nativos do Hermes.
 
-## Install (from bundle)
+## Instalar (a partir do bundle)
 
 ```bash
-# 1. Extract the bundle
+# 1. Extraia o bundle
 tar -xzf hb-bundle.tar.gz -C ~/
 
-# 2. Install everything (profiles, stacks, wrappers, skill)
+# 2. Instale tudo (perfis, stacks, wrappers, skill)
 hb-install --from ~/.hermes/hb-bundle.tar.gz
 
-# 3. Verify health
+# 3. Verifique a saúde
 hb doctor
 
-# 4. Enter a git repository
-cd /path/to/your/project
+# 4. Entre em um repositório git
+cd /caminho/do/seu/projeto
 
-# 5. First run seeds the project boundary file — review it, then re-run
+# 5. A 1ª execução cria o .hermes.md do projeto — revise e rode de novo
 hb
 
-# Daily usage
-hb            # smart mode (daily)
-hb -s python  # apply stack rules (first time)
-hb-prod       # production (conservative)
-hb-auto       # off mode — trusted repos ONLY
+# Uso diário
+hb            # modo smart (diário)
+hb -s python  # aplica regras de stack (1ª vez)
+hb-prod       # produção (conservador)
+hb-auto       # modo off — SÓ repos confiáveis
 ```
 
-## Modes
+## Modos
 
-| Command   | Mode   | Use                          |
-|-----------|--------|------------------------------|
-| `hb`      | smart  | daily development             |
-| `hb-auto` | off    | trusted repositories only    |
-| `hb-prod` | smart+ | production (whitelist, branch)|
+| Comando   | Modo   | Uso                           |
+|-----------|--------|-------------------------------|
+| `hb`      | smart  | desenvolvimento diário         |
+| `hb-auto` | off    | apenas repositórios confiáveis |
+| `hb-prod` | smart+ | produção (whitelist, branch)  |
 
-## Recover
+## Recuperar
 
-- Hermes checkpoint: `/rollback` or `/rollback N` in chat.
-- Wrapper stash: `git stash pop`.
-- `hb audit` — what changed in the last session.
+- Checkpoint do Hermes: `/rollback` ou `/rollback N` no chat.
+- Stash do wrapper: `git stash pop`.
+- `hb audit` — o que mudou na última sessão.
 
-## Limits
+## Limites
 
-Boundary is policy (`.hermes.md`) + checkpoints, NOT a kernel sandbox.
-Ceiling without root/proot on Termux. `hb-auto` removes the approval gate —
-trusted repos only.
+A fronteira é política (`.hermes.md`) + checkpoints, NÃO um sandbox de kernel.
+Teto sem root/proot no Termux. `hb-auto` remove o gate de aprovação — só repos
+confiáveis.
