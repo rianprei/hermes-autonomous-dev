@@ -30,8 +30,8 @@ jobs:
       - name: Download and extract bundle
         run: |
           mkdir -p "$HOME/.hermes"
-          curl -fsSL -L "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
-          curl -fsSL -L "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -O bundle.sha256
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -o bundle.sha256
           sha256sum -c bundle.sha256
           tar -xzf bundle.tar.gz -C "$HOME/.hermes"
           # Install Unix wrappers
@@ -94,8 +94,8 @@ jobs:
         shell: pwsh
         run: |
           mkdir -p "$HOME\.hermes"
-          curl -fsSL -L "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
-          curl -fsSL -L "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -O bundle.sha256
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -o bundle.sha256
           sha256sum -c bundle.sha256
           tar -xzf bundle.tar.gz -C "$HOME\.hermes"
           # Install Unix wrappers
