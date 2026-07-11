@@ -1,7 +1,7 @@
 ---
 name: hermes-autonomous-dev
 description: "Set up and operate the Hermes autonomous coding environment (hb/hb-auto/hb-prod wrappers, profiles, stacks, checkpoints) — the Claude Code 'skip permissions + project boundary' equivalent, Termux-native, no root/proot."
-version: 1.1.0
+version: 1.1.1
 author: Hermes Agent + user
 license: MIT
 platforms: [linux, android, windows]
