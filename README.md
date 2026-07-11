@@ -26,21 +26,25 @@ A skill é para **qualquer um que rode o Hermes Agent**, não apenas Termux:
 
 - **Linux** (desktop, server, VPS): caso mais natural — git + bash + hermes nativos.
 - **macOS**: funciona (bash, git, hermes instalados via pip/installer).
-- **Windows**: o wrapper `hb` é `/bin/sh`; rode dentro do **WSL** (Ubuntu no Windows) como um Linux comum. Sem WSL não roda.
-- **VPS / remoto**: é só Linux remoto — funciona igual; você pode rodar o Hermes lá e acessar via gateway.
+- **Windows**: suporte **nativo** (sem WSL) via scripts PowerShell em
+  `wrappers/windows/` (`hb.ps1`, `hb-auto.ps1`, etc.) + `hb.bat`. Requer
+  PowerShell 5.1+ (já vem no Windows 10/11) e `hermes`/`git` no PATH.
+  Veja `wrappers/windows/README.md`.
+- **VPS / remoto**: é só Linux remoto — funciona igual; você pode rodar o
+  Hermes lá e acessar via gateway.
 
 O foco em "Termux sem root/proot" veio do ambiente onde a skill foi criada. Em
-um PC Linux normal funciona do mesmo jeito — e melhor, pois não há a limitação
-de user namespaces desligados.
+um PC Linux/macOS normal funciona do mesmo jeito — e melhor, pois não há a
+limitação de user namespaces desligados. No Windows o conceito de "root" não
+se aplica (lá é Admin/UAC); a fronteira de projeto (.hermes.md) funciona igual.
 
 ## Instalação
 
 ```bash
-# A partir do repositório
-
+# A partir do repositório (Linux/macOS/Termux)
 hb-install --from releases/hb-bundle-v1.0.0.tar.gz
-# …ou a partir de um bundle portátil
-hb-install --from hb-bundle.tar.gz
+# Windows: veja wrappers/windows/README.md (hb-install.ps1)
+
 
 hb doctor          # verifica
 cd /seu/projeto
