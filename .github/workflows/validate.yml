@@ -19,27 +19,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install gh CLI
-        run: |
-          if [ "$RUNNER_OS" = "Linux" ]; then
-            sudo apt-get update && sudo apt-get install -y gh
-          elif [ "$RUNNER_OS" = "Windows" ]; then
-            choco install gh -y
-          fi
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Install Hermes (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-          echo "$HOME/.hermes/bin" >> $GITHUB_PATH
+      - name: Install Hermes Agent
+        run: pip install hermes-agent==0.15.2
 
-      - name: Install Hermes (Windows)
+      - name: Install Git
         if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          irm https://hermes-agent.nousresearch.com/install.ps1 | iex
-          $env:PATH += ";$HOME/.hermes/bin"
-          echo "$HOME/.hermes/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: choco install git -y --no-progress
 
       - name: Verify Hermes installed
         run: hermes --version
