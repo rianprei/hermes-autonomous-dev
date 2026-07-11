@@ -35,8 +35,8 @@ Equivalente ao "skip permissions + project boundary" do Claude Code para o
 
 ```bash
 # A partir do repositório (Linux/macOS/Termux)
-hb-install --from releases/hb-bundle-v1.1.1.tar.gz
-
+hb-install --from releases/hb-bundle-v1.1.2.tar.gz
+# Windows: veja wrappers/windows/README.md (hb-install.ps1)
 # Windows (experimental): veja wrappers/windows/README.md (hb-install.ps1)
 
 hb doctor          # verifica
@@ -95,7 +95,7 @@ profiles/                     autonomous, autonomous-prod, autonomous-yolo (conf
 stacks/                       regras de fronteira por linguagem
 wrappers/                     hb, hb-auto, hb-prod, hb-audit, hb-install
 wrappers/windows/             hb.ps1, hb-auto.ps1, hb-prod.ps1, hb-audit.ps1, hb-install.ps1, hb.bat, hb-install-check.ps1
-releases/                     hb-bundle-v1.1.1.tar.gz (+ .sha256)
+releases/                     hb-bundle-v1.1.2.tar.gz (+ .sha256)
 manifest.yaml                 manifesto de componentes
 ```
 

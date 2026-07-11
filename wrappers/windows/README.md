@@ -17,19 +17,19 @@ O Hermes Agent e o Git devem estar instalados e no PATH.
 ## Instalação
 
 1. Instale o Hermes Agent e o Git (ambos no PATH).
-2. Copie os arquivos `.ps1` e `hb.bat` para uma pasta no PATH
-   (ex.: `%USERPROFILE%\.local\bin`).
-3. Verifique:
-
-```powershell
-hb.ps1 doctor
-```
-
-ou, se tiver o `hb.bat` no PATH:
-
-```bat
-hb doctor
-```
+2. Baixe o bundle da release v1.1.2:
+   ```powershell
+   Invoke-WebRequest -Uri "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -OutFile "hb-bundle-v1.1.2.tar.gz"
+   ```
+3. Extraia e instale:
+   ```powershell
+   tar -xzf hb-bundle-v1.1.2.tar.gz -C ~/
+   .\wrappers\windows\hb-install.ps1 -From hb-bundle-v1.1.2.tar.gz
+   ```
+4. Verifique:
+   ```powershell
+   hb.ps1 doctor
+   ```
 
 ## Uso
 
@@ -37,7 +37,7 @@ hb doctor
 cd C:\meu\projeto
 hb.ps1                 # 1ª vez cria o .hermes.md — revise e rode de novo
 hb.ps1 -Stack python   # aplica regras de stack
-hb-auto.ps1 "refatore X"# modo off (só repo confiável)
+hb-auto.ps1 -ConfirmIAcceptRisks "refatore X"  # modo off (só repo confiável)
 hb-prod.ps1 "corrija Y" # produção
 ```
 
