@@ -16,6 +16,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -112,7 +117,7 @@ jobs:
           mkdir -p "$HOME\.hermes"
           # Get asset ID for bundle.tar.gz
           $assetId = (Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/vnd.github+json"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/tags/v1.1.2" | Select-Object -ExpandProperty assets | Where-Object { $_.name -eq "hb-bundle-v1.1.2.tar.gz" } | Select-Object -ExpandProperty id)
-          Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/octet-stream"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$bundleId" -OutFile bundle.tar.gz
+          Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/octet-stream"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$assetId" -OutFile bundle.tar.gz
           
           curl -fsSL -L -o bundle.sha256 "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256"
           sha256sum -c bundle.sha256
