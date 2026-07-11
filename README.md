@@ -20,10 +20,24 @@ Termux nativo, **SEM root, SEM proot**.
 - **Rollback** → checkpoints do Hermes (`/rollback [N]`) + git stash.
 - **Contexto por stack** → `python` / `javascript` / `rust` / `android` / `production`.
 
+## Plataformas
+
+A skill é para **qualquer um que rode o Hermes Agent**, não apenas Termux:
+
+- **Linux** (desktop, server, VPS): caso mais natural — git + bash + hermes nativos.
+- **macOS**: funciona (bash, git, hermes instalados via pip/installer).
+- **Windows**: o wrapper `hb` é `/bin/sh`; rode dentro do **WSL** (Ubuntu no Windows) como um Linux comum. Sem WSL não roda.
+- **VPS / remoto**: é só Linux remoto — funciona igual; você pode rodar o Hermes lá e acessar via gateway.
+
+O foco em "Termux sem root/proot" veio do ambiente onde a skill foi criada. Em
+um PC Linux normal funciona do mesmo jeito — e melhor, pois não há a limitação
+de user namespaces desligados.
+
 ## Instalação
 
 ```bash
 # A partir do repositório
+
 hb-install --from releases/hb-bundle-v1.0.0.tar.gz
 # …ou a partir de um bundle portátil
 hb-install --from hb-bundle.tar.gz
