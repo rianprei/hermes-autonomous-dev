@@ -52,10 +52,31 @@ foreach ($p in @("autonomous", "autonomous-yolo", "autonomous-prod")) {
 if (Test-Path "$Source\PROJECT_RULES_TEMPLATE.md") { Copy-Item "$Source\PROJECT_RULES_TEMPLATE.md" $HB_HOME -Force; Write-Host "  [OK] PROJECT_RULES_TEMPLATE.md" }
 if (Test-Path "$Source\HERMES_WORKFLOW.md") { Copy-Item "$Source\HERMES_WORKFLOW.md" $HB_HOME -Force; Write-Host "  [OK] HERMES_WORKFLOW.md" }
 if (Test-Path "$Source\stacks") { Copy-Item "$Source\stacks\*" "$HB_HOME\stacks\" -Force -Recurse; Write-Host "  [OK] stacks" }
-foreach ($w in @("hb.ps1", "hb-auto.ps1", "hb-prod.ps1", "hb-audit.ps1", "hb-install.ps1")) {
-    if (Test-Path "$Source\..\wrappers\windows\$w") {
-        Copy-Item "$Source\..\wrappers\windows\$w" $BIN -Force
-        Write-Host "  [OK] wrapper $w"
-    } else { Write-Host "  [WARN] wrapper $w nao encontrado" }
+# 10. Windows wrappers — detect source (bundle vs repo)
+Write-Host "hb-install: instalando wrappers Windows..."
+$wrappersWin = @("hb.ps1", "hb-auto.ps1", "hb-prod.ps1", "hb-audit.ps1", "hb-install.ps1", "hb.bat", "hb-install-check.ps1")
+$winSource = ""
+if ($From) {
+    # installing from bundle: wrappers are at ./wrappers/windows/
+    $winSource = Join-Path (Split-Path $From) "wrappers\windows"
+} elseif (Test-Path "$Source\..\wrappers\windows") {
+    # installing from repo clone
+    $winSource = "$Source\..\wrappers\windows"
+} elseif (Test-Path "$Source\wrappers\windows") {
+    $winSource = "$Source\wrappers\windows"
+}
+
+if ($winSource -and (Test-Path $winSource)) {
+    foreach ($w in $wrappersWin) {
+        $srcPath = Join-Path $winSource $w
+        if (Test-Path $srcPath) {
+            Copy-Item $srcPath $BIN -Force
+            Write-Host "  [OK] wrapper $w"
+        } else {
+            Write-Host "  [WARN] wrapper $w nao encontrado em $winSource"
+        }
+    }
+} else {
+    Write-Host "  [WARN] pasta wrappers/windows nao encontrada (bundle ou repo)"
 }
 Write-Host "hb-install: concluido. Proximo passo: entre num repo e rode 'hb.ps1 doctor'."

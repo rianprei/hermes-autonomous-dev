@@ -26,6 +26,7 @@ components:
     - hb-audit.ps1
     - hb-install.ps1
     - hb.bat
+    - hb-install-check.ps1
 tested:
   - termux
   - linux

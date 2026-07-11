@@ -52,10 +52,15 @@ if ($Audit) {
     Write-Host "=== hb audit ===" -ForegroundColor Cyan
     $db = "$HB_HOME\state.db"
     if (-not (Test-Path $db)) { Write-Host "[FAIL] state.db nao encontrado em $db"; exit 1 }
-    # list tables
-    $q = "SELECT name FROM sqlite_master WHERE type='table';"
-    try { $tables = (sqlite3 $db $q 2>$null) } catch { $tables = $null }
-    if ($tables) { Write-Host "Tabelas: $($tables -join ', ')" } else { Write-Host "Tabelas: (sqlite3 nao disponivel ou vazio)" }
+    
+    # Try sqlite3 first (if available)
+    if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+        $q = "SELECT name FROM sqlite_master WHERE type='table';"
+        try { $tables = (sqlite3 $db $q 2>$null) } catch { $tables = $null }
+        if ($tables) { Write-Host "Tabelas: $($tables -join ', ')" } else { Write-Host "Tabelas: (vazio ou erro)" }
+    } else {
+        Write-Host "Tabelas: (sqlite3 nao disponivel no Windows — instale sqlite3 ou use 'hb audit' no Linux/Termux)"
+    }
     Write-Host "Logs:"; Get-ChildItem "$HB_HOME\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.Name)" }
     Write-Host "Checkpoints:"; Get-ChildItem "$HB_HOME\checkpoints" -Recurse -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.Name)" }
     exit 0
@@ -71,8 +76,10 @@ if (-not $gitRoot) {
 
 # ---- copy .hermes.md if missing ---------------------------------------
 if (-not (Test-Path "$proj\.hermes.md")) {
+    # On Windows, prefer Windows-specific template; fall back to generic
     $src = "$HB_HOME\PROJECT_RULES_TEMPLATE.md"
     if ($Stack -and (Test-Path "$HB_HOME\stacks\$Stack.md")) { $src = "$HB_HOME\stacks\$Stack.md" }
+    if (-not $Stack -and (Test-Path "$HB_HOME\.hermes.md.windows")) { $src = "$HB_HOME\.hermes.md.windows" }
     Copy-Item $src "$proj\.hermes.md" -Force
     Write-Host "hb: copiando regras de fronteira ($src) para $proj\.hermes.md"
     Write-Host "hb: revise o .hermes.md e rode hb novamente para comecar."

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1
+- **Windows hardening**:
+  - Added `hb-install-check.ps1` — native Windows health check (mirrors Unix `hb-install-check.sh`).
+  - `hb.ps1 audit`: graceful fallback when `sqlite3` not available on Windows (informs user to install or use Linux).
+  - `hb-install.ps1`: robust wrapper detection for both bundle and repo clone sources.
+  - Updated `manifest.yaml` to include `hb-install-check.ps1` in `windows_wrappers`.
+- Bundle v1.1.1 includes all Windows wrappers + health check.
+
 ## 1.1.0
 - **Windows native support**: PowerShell wrappers (`hb.ps1`, `hb-auto.ps1`, `hb-prod.ps1`, `hb-audit.ps1`, `hb-install.ps1`, `hb.bat`) — 100% feature parity with Unix wrappers, no WSL required.
 - Added `wrappers/windows/` directory with README.
