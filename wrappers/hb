@@ -8,7 +8,7 @@
 #   hb -s <stack>  -> aplica template de stack no .hermes.md
 #
 # Em todos: fronteira de projeto (.hermes.md) + checkpoint automático.
-set -u
+set -e
 
 HB_HOME="$HOME/.hermes"
 MODE="${HB_MODE:-smart}"
@@ -19,12 +19,22 @@ case "${1:-}" in
   audit)  exec hb-audit ;;
 esac
 
-# hb doctor — checagem de saúde (não inicia o Hermes)
-if [ "${1:-}" = "doctor" ]; then
-  echo "=== hb doctor ==="
-  fail=0
-  command -v hermes >/dev/null 2>&1 && echo "[OK] hermes instalado: $(command -v hermes)" || { echo "[FAIL] hermes não encontrado"; fail=1; }
-  command -v git    >/dev/null 2>&1 && echo "[OK] git disponível" || { echo "[FAIL] git ausente"; fail=1; }
+# ---- health check -------------------------------------------------------
+if [ "$DOCTOR" = 1 ]; then
+    echo "=== hb doctor ==="
+    fail=0
+    if command -v hermes >/dev/null 2>&1; then
+        echo "[OK] hermes instalado"
+    else
+        echo "[FAIL] hermes não encontrado"
+        fail=1
+    fi
+    if command -v git >/dev/null 2>&1; then
+        echo "[OK] git disponível"
+    else
+        echo "[FAIL] git ausente"
+        fail=1
+    fi
   for p in autonomous autonomous-yolo; do
     if [ -f "$HB_HOME/profiles/$p/config.yaml" ]; then echo "[OK] profile $p"; else echo "[FAIL] profile $p ausente"; fail=1; fi
   done
@@ -72,7 +82,7 @@ fi
 # 3) Checkpoint automático ANTES de iniciar.
 if [ -n "$(git -C "$PROJECT_ROOT" status --porcelain 2>/dev/null)" ]; then
   echo "hb: working tree sujo — criando stash de checkpoint..."
-  git -C "$PROJECT_ROOT" stash push -u -m "hb-checkpoint-$(date +%s)" >/dev/null 2>&1 && \
+  git -C "$PROJECT_ROOT" stash push -m "hb-checkpoint-$(date +%s)" >/dev/null 2>&1 && \
     echo "hb: stash criado (recupere com: git stash pop)"
 fi
 

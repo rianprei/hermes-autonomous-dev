@@ -61,7 +61,7 @@ done
 if [ -d "$SRC/stacks" ]; then
   mkdir -p "$HERMES_HOME/stacks"
   cp "$SRC"/stacks/*.md "$HERMES_HOME/stacks/" 2>/dev/null
-  echo "  [OK] stacks ($(ls "$HERMES_HOME/stacks" | wc -l) arquivos)"
+  echo "  [OK] stacks ($(find "$HERMES_HOME/stacks" -type f -name '*.md' | wc -l) arquivos)"
 fi
 
 # wrappers

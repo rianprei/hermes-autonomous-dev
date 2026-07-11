@@ -1,0 +1,28 @@
+# Bundle artifacts
+*.tar.gz
+*.sha256
+
+# Hermes state
+.hermes/
+state.db*
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# Bundle temp
+.hb_bundle_*
