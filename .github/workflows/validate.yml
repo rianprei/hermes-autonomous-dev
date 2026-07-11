@@ -7,12 +7,69 @@ on:
     branches: [main]
 
 jobs:
-  validate:
-    name: Validate on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+  validate-linux:
+    name: Validate on Ubuntu
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Hermes Agent
+        run: pip install hermes-agent==0.15.2
+
+      - name: Verify Hermes installed
+        run: hermes --version
+
+      - name: Download and extract bundle
+        run: |
+          mkdir -p "$HOME/.hermes"
+          gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.tar.gz" -O bundle.tar.gz
+          gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.sha256" -O bundle.sha256
+          sha256sum -c bundle.sha256
+          tar -xzf bundle.tar.gz -C "$HOME/.hermes"
+          # Install Unix wrappers
+          mkdir -p "$HOME/.local/bin"
+          cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
+          chmod +x "$HOME/.local/bin"/* 2>/dev/null || true
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Verify hb-install available
+        run: which hb-install
+
+      - name: Health check
+        run: hb doctor
+
+      - name: Test repo workflow
+        run: |
+          git init test-repo && cd test-repo
+          git config user.email "ci@test"
+          git config user.name "CI"
+          echo "test" > file.txt && git add . && git commit -m "init"
+          hb -q "echo hello from linux"
+
+      - name: Test hb-auto requires flag
+        run: |
+          cd test-repo
+          hb-auto "echo test" && exit 1 || true  # deve falhar sem flag
+
+      - name: Test hb-auto with flag
+        run: |
+          cd test-repo
+          hb-auto --confirm-i-accept-risks "echo test with flag"
+
+      - name: Audit session
+        run: hb audit
+
+  validate-windows:
+    name: Validate on Windows
+    runs-on: windows-latest
     timeout-minutes: 20
 
     steps:
@@ -28,7 +85,6 @@ jobs:
         run: pip install hermes-agent==0.15.2
 
       - name: Install Git
-        if: runner.os == 'Windows'
         run: choco install git -y --no-progress
 
       - name: Verify Hermes installed
@@ -48,7 +104,6 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install Windows wrappers
-        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $binDir = "$HOME\.local\bin"
@@ -58,22 +113,12 @@ jobs:
           "$binDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Verify hb-install available
-        run: which hb-install || where hb-install
+        run: where hb-install
 
       - name: Health check
         run: hb doctor
 
-      - name: Test repo workflow (Unix)
-        if: runner.os == 'Linux'
-        run: |
-          git init test-repo && cd test-repo
-          git config user.email "ci@test"
-          git config user.name "CI"
-          echo "test" > file.txt && git add . && git commit -m "init"
-          hb -q "echo hello from linux"
-
       - name: Test repo workflow (Windows)
-        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           git init test-repo; cd test-repo
@@ -83,18 +128,7 @@ jobs:
           git add .; git commit -m "init"
           hb.ps1 -q "echo hello from windows"
 
-      - name: Test hb-auto requires flag
-        run: |
-          cd test-repo
-          hb-auto "echo test" && exit 1 || true  # deve falhar sem flag
-
-      - name: Test hb-auto with flag
-        run: |
-          cd test-repo
-          hb-auto --confirm-i-accept-risks "echo test with flag"
-
       - name: Test hb-auto Windows requires flag
-        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd test-repo
@@ -103,7 +137,6 @@ jobs:
           # deve falhar sem flag
 
       - name: Test hb-auto Windows with flag
-        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd test-repo
