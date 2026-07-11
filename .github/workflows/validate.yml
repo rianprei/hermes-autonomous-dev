@@ -28,10 +28,13 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p "$HOME/.hermes"
-          gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.tar.gz" -O bundle.tar.gz
-          gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.sha256" -O bundle.sha256
+          # Download bundle directly from release assets URL
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -o bundle.sha256
           sha256sum -c bundle.sha256
           tar -xzf bundle.tar.gz -C "$HOME/.hermes"
           # Install Unix wrappers
@@ -91,6 +94,8 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p "$HOME/.hermes"
           gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.tar.gz" -O bundle.tar.gz
