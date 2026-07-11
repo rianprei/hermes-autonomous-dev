@@ -1,0 +1,91 @@
+name: Validate Hermes Autonomous Dev Kit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Hermes (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+          echo "$HOME/.hermes/bin" >> $GITHUB_PATH
+
+      - name: Install Hermes (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          irm https://hermes-agent.nousresearch.com/install.ps1 | iex
+          $env:PATH += ";$HOME/.hermes/bin"
+          echo "$HOME/.hermes/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Verify Hermes installed
+        run: hermes --version
+
+      - name: Install bundle
+        run: hb-install --from releases/hb-bundle-v1.1.1.tar.gz
+
+      - name: Health check
+        run: hb doctor
+
+      - name: Test repo workflow (Unix)
+        if: runner.os == 'Linux'
+        run: |
+          git init test-repo && cd test-repo
+          git config user.email "ci@test"
+          git config user.name "CI"
+          echo "test" > file.txt && git add . && git commit -m "init"
+          hb -q "echo hello from linux"
+
+      - name: Test repo workflow (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          git init test-repo; cd test-repo
+          git config user.email "ci@test"
+          git config user.name "CI"
+          "test" | Out-File -FilePath file.txt -Encoding utf8
+          git add .; git commit -m "init"
+          hb.ps1 -q "echo hello from windows"
+
+      - name: Test hb-auto requires flag
+        run: |
+          cd test-repo
+          hb-auto "echo test" && exit 1 || true  # deve falhar sem flag
+
+      - name: Test hb-auto with flag
+        run: |
+          cd test-repo
+          hb-auto --confirm-i-accept-risks "echo test with flag"
+
+      - name: Test hb-auto Windows requires flag
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd test-repo
+          hb-auto.ps1 "echo test" 2>&1 | Select-String "MODO OFF" -Quiet || exit 1
+          # deve falhar sem flag
+
+      - name: Test hb-auto Windows with flag
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd test-repo
+          hb-auto.ps1 -ConfirmIAcceptRisks "echo test with flag"
+
+      - name: Audit session
+        run: hb audit
