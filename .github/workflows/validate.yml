@@ -39,7 +39,7 @@ jobs:
       - name: Extract bundle and install
         run: |
           mkdir -p "$HOME/.hermes"
-          tar -xzf releases/hb-bundle-v1.1.1.tar.gz -C "$HOME/.hermes"
+          tar -xzf releases/hb-bundle-v1.1.2.tar.gz -C "$HOME/.hermes"
           # Install Unix wrappers
           mkdir -p "$HOME/.local/bin"
           cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
