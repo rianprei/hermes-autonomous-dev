@@ -33,26 +33,22 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
+        id: get_bundle
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.1.2
+          assets: hb-bundle-v1.1.2.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify bundle SHA256
         run: |
-          mkdir -p "$HOME/.hermes"
-          # Get asset ID for bundle.tar.gz from release v1.1.2
-          ASSET_ID=$(curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/tags/v1.1.2" | \
-            jq -r '.assets[] | select(.name=="hb-bundle-v1.1.2.tar.gz") | .id')
-          
-          # Download bundle using GitHub API with token
-          curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/octet-stream" \
-            "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$ASSET_ID" \
-            -o bundle.tar.gz
-          
           curl -fsSL -L -o bundle.sha256 "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256"
           sha256sum -c bundle.sha256
-          tar -xzf bundle.tar.gz -C "$HOME/.hermes"
-          
+
+      - name: Extract bundle
+        run: |
+          tar -xzf ${{ steps.get_bundle.outputs.downloaded_file }} -C "$HOME/.hermes"
           # Install Unix wrappers
           mkdir -p "$HOME/.local/bin"
           cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
@@ -110,18 +106,24 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
+        id: get_bundle
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.1.2
+          assets: hb-bundle-v1.1.2.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify bundle SHA256
         shell: pwsh
         run: |
-          mkdir -p "$HOME\.hermes"
-          # Get asset ID for bundle.tar.gz
-          $assetId = (Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/vnd.github+json"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/tags/v1.1.2" | Select-Object -ExpandProperty assets | Where-Object { $_.name -eq "hb-bundle-v1.1.2.tar.gz" } | Select-Object -ExpandProperty id)
-          Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/octet-stream"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$assetId" -OutFile bundle.tar.gz
-          
           curl -fsSL -L -o bundle.sha256 "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256"
           sha256sum -c bundle.sha256
-          tar -xzf bundle.tar.gz -C "$HOME\.hermes"
+
+      - name: Extract bundle
+        shell: pwsh
+        run: |
+          tar -xzf ${{ steps.get_bundle.outputs.downloaded_file }} -C "$HOME\.hermes"
           # Install Unix wrappers
           mkdir -p "$HOME\.local\bin"
           cp "$HOME\.hermes\wrappers\"* "$HOME\.local\bin\" 2>$null || $true
