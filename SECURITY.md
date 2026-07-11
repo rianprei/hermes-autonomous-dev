@@ -46,11 +46,23 @@ Kit protege e contra o que **não** protege. Leia antes de usar o `hb-auto`.
 O `hb-auto` remove o último gate de aprovação. **Use apenas em repositórios
 que você controla e tem backup.** Não é o padrão.
 
+### `hb-auto` — uso seguro (v1.1.1+)
+
+```bash
+# Modo OFF (sem aprovação) — REQUER confirmação explícita:
+hb-auto --confirm-i-accept-risks "refatore X"
+
+# Windows:
+hb-auto.ps1 -ConfirmIAcceptRisks "refatore X"
+```
+
+> **⚠️ AVISO**: `hb-auto` desabilita TODAS as aprovações. O modelo pode executar qualquer comando. Use APENAS em repositórios que VOCÊ controla e confia. Em repos de terceiros = execução arbitrária de código.
+
 ## Recomendações
 
 1. Use `hb` por padrão. Reserve `hb-auto` para repos descartáveis ou com backup.
 2. Sempre crie uma branch de feature antes de grandes mudanças (`hb-prod` obriga).
 3. Rode `hb doctor` após qualquer mudança de ambiente.
 4. Verifique a integridade do bundle com o SHA256 publicado antes de instalar:
-   `sha256sum -c releases/hb-bundle-v1.0.0.sha256`.
+   `sha256sum -c releases/hb-bundle-v1.1.1.sha256`.
 5. Lembre-se: isto é um **workflow seguro**, não uma sandbox.
