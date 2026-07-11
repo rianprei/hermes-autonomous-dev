@@ -1,5 +1,5 @@
 name: hermes-autonomous-dev
-version: 1.1.0
+version: 1.1.1
 description: "Hermes Agent autonomous coding kit (hb/hb-auto/hb-prod) — multiplatform (Linux/macOS/WSL/VPS/Termux/Windows), no root/proot."
 license: MIT
 platforms:
