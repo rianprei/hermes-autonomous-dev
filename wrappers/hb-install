@@ -1,0 +1,81 @@
+#!/bin/sh
+# hb-install — recria o ambiente Hermes autonomous (profiles + stacks +
+# templates + wrappers). Termux-native, sem root/proot.
+#
+# Uso:
+#   hb-install            # instala/atualiza a partir do ~/.hermes atual
+#   hb-install --bundle   # gera tarball portátil em ~/.hermes/hb-bundle.tar.gz
+#   hb-install --from TAR # instala a partir de um bundle
+set -u
+
+HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
+BIN_DIR="$HOME/.local/bin"
+SRC="${HB_INSTALL_SRC:-$HERMES_HOME}"
+
+mkdir -p "$HERMES_HOME/profiles" "$HERMES_HOME/stacks" "$BIN_DIR"
+
+case "${1:-}" in
+  --bundle)
+    echo "hb-install: gerando bundle em $HERMES_HOME/hb-bundle.tar.gz"
+    tar -czf "$HERMES_HOME/hb-bundle.tar.gz" \
+      -C "$HERMES_HOME" \
+      profiles/autonomous/config.yaml \
+      profiles/autonomous-yolo/config.yaml \
+      profiles/autonomous-prod/config.yaml \
+      stacks \
+      PROJECT_RULES_TEMPLATE.md \
+      HERMES_WORKFLOW.md 2>/dev/null
+    tar -czf "$HERMES_HOME/hb-bundle-bin.tar.gz" -C "$BIN_DIR" hb hb-auto hb-prod hb-audit 2>/dev/null
+    echo "hb-install: bundle pronto: $HERMES_HOME/hb-bundle.tar.gz (+ hb-bundle-bin.tar.gz)"
+    exit 0
+    ;;
+  --from)
+    BUNDLE="${2:?informe o caminho do tar}"
+    echo "hb-install: instalando de $BUNDLE"
+    tar -xzf "$BUNDLE" -C "$HERMES_HOME"
+    bindir="$(dirname "$BUNDLE")"
+    [ -f "$bindir/hb-bundle-bin.tar.gz" ] && tar -xzf "$bindir/hb-bundle-bin.tar.gz" -C "$BIN_DIR"
+    chmod +x "$BIN_DIR"/hb "$BIN_DIR"/hb-auto "$BIN_DIR"/hb-prod "$BIN_DIR"/hb-audit 2>/dev/null
+    echo "hb-install: concluído a partir do bundle."
+    exit 0
+    ;;
+esac
+
+# instalação padrão: copia do SRC (normalmente o próprio ~/.hermes)
+echo "hb-install: instalando a partir de $SRC"
+
+# profiles
+for p in autonomous autonomous-yolo autonomous-prod; do
+  if [ -f "$SRC/profiles/$p/config.yaml" ]; then
+    mkdir -p "$HERMES_HOME/profiles/$p"
+    cp "$SRC/profiles/$p/config.yaml" "$HERMES_HOME/profiles/$p/config.yaml"
+    echo "  [OK] profile $p"
+  else
+    echo "  [WARN] profile $p ausente em $SRC"
+  fi
+done
+
+# stacks + templates + workflow
+[ -f "$SRC/PROJECT_RULES_TEMPLATE.md" ] && cp "$SRC/PROJECT_RULES_TEMPLATE.md" "$HERMES_HOME/" && echo "  [OK] PROJECT_RULES_TEMPLATE.md"
+[ -f "$SRC/HERMES_WORKFLOW.md" ] && cp "$SRC/HERMES_WORKFLOW.md" "$HERMES_HOME/" && echo "  [OK] HERMES_WORKFLOW.md"
+if [ -d "$SRC/stacks" ]; then
+  mkdir -p "$HERMES_HOME/stacks"
+  cp "$SRC"/stacks/*.md "$HERMES_HOME/stacks/" 2>/dev/null
+  echo "  [OK] stacks ($(ls "$HERMES_HOME/stacks" | wc -l) arquivos)"
+fi
+
+# wrappers
+for w in hb hb-auto hb-prod hb-audit; do
+  if [ -f "$SRC/../.local/bin/$w" ] || [ -f "$BIN_DIR/$w" ]; then
+    srcw="$BIN_DIR/$w"
+    [ -f "$SRC/../.local/bin/$w" ] && srcw="$SRC/../.local/bin/$w"
+    cp "$srcw" "$BIN_DIR/$w"
+    chmod +x "$BIN_DIR/$w"
+    echo "  [OK] wrapper $w"
+  else
+    echo "  [WARN] wrapper $w não encontrado"
+  fi
+done
+
+echo "hb-install: concluído."
+echo "Próximo passo: entre num repo e rode 'hb doctor'."

@@ -1,0 +1,37 @@
+name: hermes-autonomous-dev
+version: 1.0.0
+description: >-
+  Autonomous development workflow for Hermes (Claude Code "skip perms +
+  project boundary" equivalent). Termux-native, no root, no proot.
+license: MIT
+
+components:
+  skills:
+    - hermes-autonomous-dev
+  profiles:
+    - autonomous
+    - autonomous-prod
+    - autonomous-yolo
+  wrappers:
+    - hb
+    - hb-auto
+    - hb-prod
+    - hb-audit
+    - hb-install
+
+platform:
+  - android
+  - linux
+
+tested:
+  - termux
+  - no-root
+  - no-proot
+
+provides:
+  - approvals smart/off modes
+  - project boundary via .hermes.md
+  - filesystem checkpoints (/rollback)
+  - per-stack context (python/js/rust/android/production)
+  - health check (hb doctor) and session audit (hb audit)
+  - reproducible installer (hb-install)

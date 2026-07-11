@@ -1,0 +1,4 @@
+#!/bin/sh
+# hb-prod — modo conservador (production).
+# smart + whitelist + checkpoint + branch obrigatória + sem install automático.
+HB_MODE=smart HB_PROFILE=autonomous-prod exec hb -s production "$@"

@@ -1,0 +1,28 @@
+# Hermes "autonomous-yolo" profile — modo Claude Code (skip perms total).
+# Use APENAS para tarefas confiáveis e repositórios que você controla.
+# Não é o padrão; o wrapper 'hb-yolo' é quem dispara este profile.
+agent:
+  max_turns: 90
+
+# DESLIGA toda aprovação (equiv. --yolo / --dangerously-skip-permissions).
+# Combine com .hermes.md (fronteira) + checkpoints. Sem sandbox de SO.
+approvals:
+  mode: off
+
+checkpoints:
+  enabled: true
+  max_snapshots: 50
+
+terminal:
+  backend: local
+  timeout: 300
+
+display:
+  tool_progress: true
+  show_cost: false
+
+security:
+  redact_secrets: true
+
+model:
+  default: tencent/hy3:free

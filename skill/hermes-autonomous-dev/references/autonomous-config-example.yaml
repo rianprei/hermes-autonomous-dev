@@ -1,0 +1,54 @@
+# Reference: Hermes autonomous-mode config + wrapper (verified working)
+
+## 1) Profile config: ~/.hermes/profiles/autonomous/config.yaml
+```yaml
+agent:
+  max_turns: 90
+
+approvals:
+  mode: off          # = --yolo; no permission prompts
+
+checkpoints:
+  enabled: true
+  max_snapshots: 50
+
+terminal:
+  backend: local
+  timeout: 300
+
+security:
+  redact_secrets: true
+```
+Set model after creating: `hermes config set --profile autonomous model.default "tencent/hy3:free"`
+
+## 2) Wrapper: ~/.local/bin/hb  (chmod +x; ensure ~/.local/bin on PATH)
+```sh
+#!/bin/sh
+# hb — Hermes autonomous build wrapper (Claude Code skip-perms + boundary equiv.)
+set -u
+PROJECT_ROOT="$(pwd)"
+if ! git -C "$PROJECT_ROOT" rev-parse --show-toplevel >/dev/null 2>&1; then
+  echo "hb: ERRO — não está dentro de um repositório git." >&2
+  exit 1
+fi
+if [ ! -f "$PROJECT_ROOT/.hermes.md" ]; then
+  cp "$HOME/.hermes/PROJECT_RULES_TEMPLATE.md" "$PROJECT_ROOT/.hermes.md"
+  echo "hb: revise o .hermes.md e rode hb novamente." >&2
+  exit 0
+fi
+cd "$PROJECT_ROOT"
+if [ "$#" -gt 0 ]; then
+  exec hermes chat --profile autonomous --checkpoints -q "$*"
+else
+  exec hermes chat --profile autonomous --checkpoints
+fi
+```
+
+## 3) .hermes.md template: ~/.hermes/PROJECT_RULES_TEMPLATE.md
+See SKILL.md body for the boundary rules; copy into each repo as `.hermes.md`.
+
+## Verification (what was actually run)
+- `hermes profile list` → `autonomous` present.
+- `hb` in a test repo → copied `.hermes.md`, exited for review.
+- `hb "liste os arquivos..."` → Hermes ran search_files/terminal/read_file with NO prompts, respected repo. ✅
+- `hermes chat --profile autonomous -q "..."` (without model) → HTTP 400 "No models provided" → fixed by setting model.default.

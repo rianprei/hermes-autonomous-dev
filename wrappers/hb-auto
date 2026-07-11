@@ -1,0 +1,4 @@
+#!/bin/sh
+# hb-auto — modo Claude Code (approvals OFF, sem prompts).
+# Use só em tarefas confiáveis e repositórios sob seu controle.
+HB_MODE=off HB_PROFILE=autonomous-yolo exec hb "$@"

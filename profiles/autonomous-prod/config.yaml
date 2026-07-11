@@ -1,0 +1,27 @@
+# Hermes "autonomous-prod" profile — modo conservador (production).
+# Uso: hb-prod  (apenas em projeto com branch dedicada + backup).
+# Mantém approvals smart (gate em comandos de risco) + checkpoints.
+agent:
+  max_turns: 90
+
+# GATE LIGADO: comandos de alto risco ainda pedem aprovação.
+approvals:
+  mode: smart
+
+checkpoints:
+  enabled: true
+  max_snapshots: 50
+
+terminal:
+  backend: local
+  timeout: 300
+
+display:
+  tool_progress: true
+  show_cost: false
+
+security:
+  redact_secrets: true
+
+model:
+  default: tencent/hy3:free

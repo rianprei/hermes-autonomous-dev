@@ -1,0 +1,17 @@
+agent:
+  max_turns: 90
+approvals:
+  mode: smart
+checkpoints:
+  enabled: true
+  max_snapshots: 50
+terminal:
+  backend: local
+  timeout: 300
+display:
+  tool_progress: true
+  show_cost: false
+security:
+  redact_secrets: true
+model:
+  default: tencent/hy3:free
