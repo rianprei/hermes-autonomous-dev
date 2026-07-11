@@ -28,13 +28,10 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p "$HOME/.hermes"
-          # Download bundle directly from release assets URL
           curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.tar.gz" -o bundle.tar.gz
-          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -o bundle.sha256
+          curl -fsSL "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256" -O bundle.sha256
           sha256sum -c bundle.sha256
           tar -xzf bundle.tar.gz -C "$HOME/.hermes"
           # Install Unix wrappers
@@ -94,19 +91,18 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
         run: |
-          mkdir -p "$HOME/.hermes"
+          mkdir -p "$HOME\.hermes"
           gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.tar.gz" -O bundle.tar.gz
           gh release download v1.1.2 -R rianprei/hermes-autonomous-dev -p "hb-bundle-v1.1.2.sha256" -O bundle.sha256
           sha256sum -c bundle.sha256
-          tar -xzf bundle.tar.gz -C "$HOME/.hermes"
+          tar -xzf bundle.tar.gz -C "$HOME\.hermes"
           # Install Unix wrappers
-          mkdir -p "$HOME/.local/bin"
-          cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
-          chmod +x "$HOME/.local/bin"/* 2>/dev/null || true
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          mkdir -p "$HOME\.local\bin"
+          cp "$HOME\.hermes\wrappers\"* "$HOME\.local\bin\" 2>$null || $true
+          chmod +x "$HOME\.local\bin\*" 2>$null || $true
+          "$HOME\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install Windows wrappers
         shell: pwsh
