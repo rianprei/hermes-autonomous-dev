@@ -30,6 +30,8 @@ jobs:
         run: pip install hermes-agent==0.15.2
 
       - name: Install Hermes Autonomous Dev Kit (Linux)
+        env:
+          HB_INSTALL_SRC: ${{ github.workspace }}
         run: |
           chmod +x wrappers/hb-install
           ./wrappers/hb-install
@@ -86,6 +88,8 @@ jobs:
 
       - name: Install Hermes Autonomous Dev Kit (Windows)
         shell: pwsh
+        env:
+          HB_INSTALL_SRC: ${{ github.workspace }}
         run: |
           .\wrappers\windows\hb-install.ps1
 
