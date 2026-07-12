@@ -89,13 +89,12 @@ jobs:
       - name: Verify Hermes installed
         run: hermes --version
 
-      - name: Set up wrappers from repository
+      - name: Set up Windows wrappers from repository
         shell: pwsh
         run: |
           $binDir = "$HOME\.local\bin"
           New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-          Copy-Item "wrappers\*" -Destination $binDir -Force
-          # Ensure .ps1 and .bat are executable? On Windows, just ensure they are in PATH
+          Copy-Item "wrappers\windows\*" -Destination $binDir -Force
           $env:PATH += ";$binDir"
           "$binDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
