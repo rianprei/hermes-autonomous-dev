@@ -32,25 +32,10 @@ jobs:
       - name: Verify Hermes installed
         run: hermes --version
 
-      - name: Download and extract bundle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up wrappers from repository
         run: |
-          mkdir -p "$HOME/.hermes"
-          # Download bundle asset
-          curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/octet-stream" \
-            "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/tags/v1.1.2" | jq -r '.assets[] | select(.name=="hb-bundle-v1.1.2.tar.gz") | .id')" \
-            -o bundle.tar.gz
-          # Download SHA256 file
-          curl -fsSL -L -o bundle.sha256 "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256"
-          # Verify checksum
-          sha256sum -c bundle.sha256
-          # Extract
-          tar -xzf bundle.tar.gz -C "$HOME/.hermes"
-          # Install Unix wrappers
           mkdir -p "$HOME/.local/bin"
-          cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
+          cp wrappers/* "$HOME/.local/bin/" 2>/dev/null || true
           chmod +x "$HOME/.local/bin"/* 2>/dev/null || true
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
@@ -104,34 +89,13 @@ jobs:
       - name: Verify Hermes installed
         run: hermes --version
 
-      - name: Download and extract bundle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          mkdir -p "$HOME\.hermes"
-          # Get asset ID for bundle.tar.gz
-          $assetId = (Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/vnd.github+json"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/tags/v1.1.2" | Select-Object -ExpandProperty assets | Where-Object { $_.name -eq "hb-bundle-v1.1.2.tar.gz" } | Select-Object -ExpandProperty id)
-          # Download bundle
-          Invoke-RestMethod -Headers @{Authorization = "Bearer $env:GITHUB_TOKEN"; Accept = "application/octet-stream"} -Uri "https://api.github.com/repos/rianprei/hermes-autonomous-dev/releases/assets/$assetId" -OutFile "$HOME\.hermes\bundle.tar.gz"
-          # Download SHA256 file
-          curl -fsSL -L -o "$HOME\.hermes\bundle.sha256" "https://github.com/rianprei/hermes-autonomous-dev/releases/download/v1.1.2/hb-bundle-v1.1.2.sha256"
-          # Verify checksum
-          sha256sum -c "$HOME\.hermes\bundle.sha256"
-          # Extract bundle
-          tar -xzf "$HOME\.hermes\bundle.tar.gz" -C "$HOME\.hermes"
-          # Install Unix wrappers
-          mkdir -p "$HOME\.local\bin"
-          cp "$HOME\.hermes\wrappers\"* "$HOME\.local\bin\" 2>$null || $true
-          chmod +x "$HOME\.local\bin\*" 2>$null || $true
-          "$HOME\.local\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Install Windows wrappers
+      - name: Set up wrappers from repository
         shell: pwsh
         run: |
           $binDir = "$HOME\.local\bin"
           New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-          Copy-Item "$HOME\.hermes\wrappers\windows\*" -Destination $binDir -Force
+          Copy-Item "wrappers\*" -Destination $binDir -Force
+          # Ensure .ps1 and .bat are executable? On Windows, just ensure they are in PATH
           $env:PATH += ";$binDir"
           "$binDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
