@@ -33,10 +33,11 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
-        uses: actions/download-release-asset@v1
+        id: get_bundle
+        uses: softprops/action-gh-release@v1
         with:
-          release: v1.1.2
-          asset_name: hb-bundle-v1.1.2.tar.gz
+          tag_name: v1.1.2
+          assets: hb-bundle-v1.1.2.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -48,7 +49,7 @@ jobs:
       - name: Extract bundle
         run: |
           mkdir -p "$HOME/.hermes"
-          tar -xzf hb-bundle-v1.1.2.tar.gz -C "$HOME/.hermes"
+          tar -xzf ${{ steps.get_bundle.outputs.downloaded_file }} -C "$HOME/.hermes"
           # Install Unix wrappers
           mkdir -p "$HOME/.local/bin"
           cp "$HOME/.hermes/wrappers/"* "$HOME/.local/bin/" 2>/dev/null || true
@@ -106,10 +107,11 @@ jobs:
         run: hermes --version
 
       - name: Download and extract bundle
-        uses: actions/download-release-asset@v1
+        id: get_bundle
+        uses: softprops/action-gh-release@v1
         with:
-          release: v1.1.2
-          asset_name: hb-bundle-v1.1.2.tar.gz
+          tag_name: v1.1.2
+          assets: hb-bundle-v1.1.2.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -123,7 +125,7 @@ jobs:
         shell: pwsh
         run: |
           mkdir -p "$HOME\.hermes"
-          tar -xzf hb-bundle-v1.1.2.tar.gz -C "$HOME\.hermes"
+          tar -xzf ${{ steps.get_bundle.outputs.downloaded_file }} -C "$HOME\.hermes"
           # Install Unix wrappers
           mkdir -p "$HOME\.local\bin"
           cp "$HOME\.hermes\wrappers\"* "$HOME\.local\bin\" 2>$null || $true
