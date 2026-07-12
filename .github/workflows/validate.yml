@@ -123,9 +123,11 @@ jobs:
         shell: pwsh
         run: |
           cd test-repo
-          & "$HOME\.local\bin\hb-auto.ps1" "echo test"
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "OK: hb-auto bloqueou execucao sem flag (exit $LASTEXITCODE)"
+          $cmd = "$HOME\.local\bin\hb-auto.ps1 'echo test'"
+          $output = Invoke-Expression $cmd 2>&1
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -ne 0) {
+            Write-Host "OK: hb-auto bloqueou execucao sem flag (exit $exitCode)"
           } else {
             Write-Host "FAIL: hb-auto deveria ter bloqueado mas saiu com 0"
             exit 1
