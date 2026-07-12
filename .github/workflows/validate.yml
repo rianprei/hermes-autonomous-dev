@@ -61,9 +61,9 @@ jobs:
           cd test-repo
           hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita"
 
-      - name: Audit session (verify command exists and runs)
+      - name: Audit session
         run: |
-          hb audit 2>&1 | grep -q "state.db" || true
+          hb audit 2>&1 | head -20
           echo "OK: hb audit command runs"
 
   validate-windows:
@@ -129,8 +129,10 @@ jobs:
           Write-Host "OK: flag aceita (sem MODO OFF)"
           exit 0
 
-      - name: Audit session (verify command runs)
+      - name: Audit session
         shell: pwsh
         run: |
           & "$HOME\.local\bin\hb.ps1" audit 2>&1 | Select-String "state.db|Hermes" -Quiet
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           Write-Host "OK: hb.ps1 audit command runs"
+          exit 0
