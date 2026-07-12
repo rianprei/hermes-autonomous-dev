@@ -100,7 +100,9 @@ jobs:
         run: where hb-install
 
       - name: Health check
-        run: hb.ps1 doctor
+        shell: pwsh
+        run: |
+          & "$HOME\.local\bin\hb.ps1" doctor
 
       - name: Test repo workflow (Windows)
         shell: pwsh
@@ -110,13 +112,13 @@ jobs:
           git config user.name "CI"
           "test" | Out-File -FilePath file.txt -Encoding utf8
           git add .; git commit -m "init"
-          hb.ps1 -q "echo hello from windows"
+          & "$HOME\.local\bin\hb.ps1" -q "echo hello from windows"
 
       - name: Test hb-auto Windows requires flag
         shell: pwsh
         run: |
           cd test-repo
-          $result = hb-auto.ps1 "echo test" 2>&1
+          $result = & "$HOME\.local\bin\hb-auto.ps1" "echo test" 2>&1
           if (-not ($result -match "MODO OFF")) { exit 1 }
           # deve falhar sem flag
 
@@ -124,7 +126,9 @@ jobs:
         shell: pwsh
         run: |
           cd test-repo
-          hb-auto.ps1 -ConfirmIAcceptRisks "echo test with flag"
+          & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test with flag"
 
       - name: Audit session
-        run: hb.ps1 audit
+        shell: pwsh
+        run: |
+          & "$HOME\.local\bin\hb.ps1" audit
