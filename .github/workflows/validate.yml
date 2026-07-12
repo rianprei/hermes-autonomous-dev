@@ -116,6 +116,7 @@ jobs:
           & "$HOME\.local\bin\hb-auto.ps1" "echo test"
           if ($LASTEXITCODE -eq 0) { exit 1 }
           Write-Host "OK: hb-auto bloqueou sem flag (exit $LASTEXITCODE)"
+          exit 0
 
       - name: Test hb-auto Windows with flag accepted
         shell: pwsh
@@ -124,6 +125,7 @@ jobs:
           $output = & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test" 2>&1
           if ($output -match "MODO OFF") { exit 1 }
           Write-Host "OK: flag aceita (sem MODO OFF)"
+          exit 0
 
       - name: Audit session
         shell: pwsh
