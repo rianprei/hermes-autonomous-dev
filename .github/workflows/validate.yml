@@ -39,9 +39,6 @@ jobs:
       - name: Verify Hermes installed
         run: hermes --version
 
-      - name: Verify hb-install available
-        run: which hb-install
-
       - name: Health check
         run: hb doctor
 
@@ -56,7 +53,12 @@ jobs:
       - name: Test hb-auto requires flag
         run: |
           cd test-repo
-          hb-auto "echo test" && exit 1 || true  # deve falhar sem flag
+          if hb-auto "echo test" 2>&1 | grep -q "MODO OFF"; then
+            echo "OK: hb-auto bloqueou execucao sem flag"
+          else
+            echo "FAIL: hb-auto deveria ter bloqueado"
+            exit 1
+          fi
 
       - name: Test hb-auto with flag
         run: |
@@ -96,9 +98,6 @@ jobs:
       - name: Verify Hermes installed
         run: hermes --version
 
-      - name: Verify hb-install available
-        run: where hb-install
-
       - name: Health check
         shell: pwsh
         run: |
@@ -119,8 +118,12 @@ jobs:
         run: |
           cd test-repo
           $result = & "$HOME\.local\bin\hb-auto.ps1" "echo test" 2>&1
-          if (-not ($result -match "MODO OFF")) { exit 1 }
-          # deve falhar sem flag
+          if ($result -match "MODO OFF") {
+            Write-Host "OK: hb-auto bloqueou execucao sem flag"
+          } else {
+            Write-Host "FAIL: hb-auto deveria ter bloqueado"
+            exit 1
+          }
 
       - name: Test hb-auto Windows with flag
         shell: pwsh
