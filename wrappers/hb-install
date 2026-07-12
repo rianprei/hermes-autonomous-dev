@@ -26,7 +26,7 @@ case "${1:-}" in
       PROJECT_RULES_TEMPLATE.md \
       HERMES_WORKFLOW.md 2>/dev/null
     tar -czf "$HERMES_HOME/hb-bundle-bin.tar.gz" -C "$BIN_DIR" hb hb-auto hb-prod hb-audit 2>/dev/null
-    echo "hb-install: bundle pronto: $HERMES_HOME/hb-bundle.tar.gz (+ hb-bundle-bin.tar.gz)"
+    echo "hb-install: pronto: $HERMES_HOME/hb-bundle.tar.gz (+ hb-bundle-bin.tar.gz)"
     exit 0
     ;;
   --from)
@@ -64,17 +64,20 @@ if [ -d "$SRC/stacks" ]; then
   echo "  [OK] stacks ($(find "$HERMES_HOME/stacks" -type f -name '*.md' | wc -l) arquivos)"
 fi
 
-# wrappers
+# wrappers (Unix only: hb, hb-auto, hb-prod, hb-audit)
+WRAPPER_DIR="$(dirname "$0")"
 for w in hb hb-auto hb-prod hb-audit; do
-  if [ -f "$SRC/../.local/bin/$w" ] || [ -f "$BIN_DIR/$w" ]; then
+  if [ -f "$WRAPPER_DIR/$w" ]; then
+    srcw="$WRAPPER_DIR/$w"
+  elif [ -f "$BIN_DIR/$w" ]; then
     srcw="$BIN_DIR/$w"
-    [ -f "$SRC/../.local/bin/$w" ] && srcw="$SRC/../.local/bin/$w"
-    cp "$srcw" "$BIN_DIR/$w"
-    chmod +x "$BIN_DIR/$w"
-    echo "  [OK] wrapper $w"
   else
     echo "  [WARN] wrapper $w não encontrado"
+    continue
   fi
+  cp "$srcw" "$BIN_DIR/$w"
+  chmod +x "$BIN_DIR/$w"
+  echo "  [OK] wrapper $w"
 done
 
 echo "hb-install: concluído."
