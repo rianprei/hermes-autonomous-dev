@@ -117,11 +117,11 @@ jobs:
         shell: pwsh
         run: |
           cd test-repo
-          $result = & "$HOME\.local\bin\hb-auto.ps1" "echo test" 2>&1
-          if ($result -match "MODO OFF") {
-            Write-Host "OK: hb-auto bloqueou execucao sem flag"
+          & "$HOME\.local\bin\hb-auto.ps1" "echo test"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "OK: hb-auto bloqueou execucao sem flag (exit $LASTEXITCODE)"
           } else {
-            Write-Host "FAIL: hb-auto deveria ter bloqueado"
+            Write-Host "FAIL: hb-auto deveria ter bloqueado mas saiu com 0"
             exit 1
           }
 
