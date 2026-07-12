@@ -60,10 +60,16 @@ jobs:
             exit 1
           fi
 
-      - name: Test hb-auto with flag
+      - name: Test hb-auto with flag accepted
         run: |
           cd test-repo
-          hb-auto --confirm-i-accept-risks "echo test with flag"
+          # Com flag, não deve mostrar "MODO OFF" (mesmo que falhe depois por API keys)
+          if hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF"; then
+            echo "FAIL: flag --confirm-i-accept-risks não foi aceita"
+            exit 1
+          else
+            echo "OK: flag --confirm-i-accept-risks aceita (sem MODO OFF)"
+          fi
 
       - name: Audit session
         run: hb audit
@@ -125,11 +131,17 @@ jobs:
             exit 1
           }
 
-      - name: Test hb-auto Windows with flag
+      - name: Test hb-auto Windows with flag accepted
         shell: pwsh
         run: |
           cd test-repo
-          & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test with flag"
+          $output = & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test" 2>&1
+          if ($output -match "MODO OFF") {
+            Write-Host "FAIL: flag -ConfirmIAcceptRisks não foi aceita"
+            exit 1
+          } else {
+            Write-Host "OK: flag -ConfirmIAcceptRisks aceita (sem MODO OFF)"
+          }
 
       - name: Audit session
         shell: pwsh
