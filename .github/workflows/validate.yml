@@ -91,7 +91,7 @@ jobs:
         env:
           HB_INSTALL_SRC: ${{ github.workspace }}
         run: |
-          .\wrappers\windows\hb-install.ps1
+          .\wrappers\windows\hb-install.ps1 -Source $env:HB_INSTALL_SRC
 
       - name: Verify Hermes installed
         run: hermes --version
