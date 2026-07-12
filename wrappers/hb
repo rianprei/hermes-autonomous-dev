@@ -16,7 +16,7 @@ PROFILE="${HB_PROFILE:-autonomous}"
 
 # subcomandos do wrapper (não exigem repo)
 case "${1:-}" in
-  audit)  exec hb-audit ;;&
+  audit)  exec hb-audit ;;
 esac
 
 # ---- health check -------------------------------------------------------
