@@ -100,7 +100,7 @@ jobs:
         run: where hb-install
 
       - name: Health check
-        run: hb doctor
+        run: hb.ps1 doctor
 
       - name: Test repo workflow (Windows)
         shell: pwsh
@@ -127,4 +127,4 @@ jobs:
           hb-auto.ps1 -ConfirmIAcceptRisks "echo test with flag"
 
       - name: Audit session
-        run: hb audit
+        run: hb.ps1 audit
