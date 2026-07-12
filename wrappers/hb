@@ -16,7 +16,7 @@ PROFILE="${HB_PROFILE:-autonomous}"
 
 # subcomandos do wrapper (não exigem repo)
 case "${1:-}" in
-  audit)  exec hb-audit ;;
+  audit)  exec hb-audit ;;&
 esac
 
 # ---- health check -------------------------------------------------------
@@ -45,7 +45,12 @@ if [ "$DOCTOR" = 1 ]; then
   # .hermes.md presente?
   [ -f "$(pwd)/.hermes.md" ] && echo "[OK] .hermes.md presente no projeto" || echo "[WARN] .hermes.md ausente (hb criará na 1ª rodada)"
   # checkpoints habilitados?
-  grep -q "enabled: true" "$HB_HOME/profiles/autonomous/config.yaml" 2>/dev/null && echo "[OK] checkpoints habilitados" || echo "[WARN] checkpoints desligados"
+  # Verificação mais tolerante: procura por 'enabled: true' ignorando espaços iniciais e comentários
+  if grep -E '^\s*enabled:\s*true\s*$' "$HB_HOME/profiles/autonomous/config.yaml" 2>/dev/null; then
+    echo "[OK] checkpoints habilitados"
+  else
+    echo "[WARN] checkpoints desligados ou não encontrados"
+  fi
   # espaço em disco
   df -h "$HOME" 2>/dev/null | awk 'NR==2{print "[INFO] disco " $5 " usado em " $6}'
   [ "$fail" = "0" ] && echo "=== STATUS: OK ===" || echo "=== STATUS: PROBLEMAS ENCONTRADOS ==="
