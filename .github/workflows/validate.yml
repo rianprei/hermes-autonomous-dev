@@ -53,22 +53,13 @@ jobs:
       - name: Test hb-auto requires flag
         run: |
           cd test-repo
-          if hb-auto "echo test" 2>&1 | grep -q "MODO OFF"; then
-            echo "OK: hb-auto bloqueou execucao sem flag"
-          else
-            echo "FAIL: hb-auto deveria ter bloqueado"
-            exit 1
-          fi
+          ! hb-auto "echo test" 2>&1 | grep -q "MODO OFF"
+          echo "OK: hb-auto bloqueou sem flag"
 
       - name: Test hb-auto with flag accepted
         run: |
           cd test-repo
-          if hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF"; then
-            echo "FAIL: flag --confirm-i-accept-risks nao foi aceita"
-            exit 1
-          else
-            echo "OK: flag --confirm-i-accept-risks aceita (sem MODO OFF)"
-          fi
+          hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita"
 
       - name: Audit session
         run: hb audit
@@ -123,24 +114,16 @@ jobs:
         run: |
           cd test-repo
           & "$HOME\.local\bin\hb-auto.ps1" "echo test"
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "OK: hb-auto bloqueou execucao sem flag (exit $LASTEXITCODE)"
-          } else {
-            Write-Host "FAIL: hb-auto deveria ter bloqueado mas saiu com 0"
-            throw "Test failed: expected non-zero exit"
-          }
+          if ($LASTEXITCODE -eq 0) { exit 1 }
+          Write-Host "OK: hb-auto bloqueou sem flag (exit $LASTEXITCODE)"
 
       - name: Test hb-auto Windows with flag accepted
         shell: pwsh
         run: |
           cd test-repo
           $output = & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test" 2>&1
-          if ($output -match "MODO OFF") {
-            Write-Host "FAIL: flag -ConfirmIAcceptRisks nao foi aceita"
-            throw "Test failed: flag not accepted"
-          } else {
-            Write-Host "OK: flag -ConfirmIAcceptRisks aceita (sem MODO OFF)"
-          }
+          if ($output -match "MODO OFF") { exit 1 }
+          Write-Host "OK: flag aceita (sem MODO OFF)"
 
       - name: Audit session
         shell: pwsh
