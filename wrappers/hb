@@ -9,7 +9,7 @@
 #   hb -s <stack>  -> aplica template de stack no .hermes.md
 #
 # Em todos: fronteira de projeto (.hermes.md) + checkpoint automático.
-set -euo pipefail
+set -eu
 
 HB_HOME="$HOME/.hermes"
 MODE="${HB_MODE:-smart}"
