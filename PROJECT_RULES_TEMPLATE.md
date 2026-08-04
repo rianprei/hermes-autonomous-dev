@@ -11,14 +11,13 @@ You are operating in AUTONOMOUS coding mode for THIS repository only.
   - Access, read, or modify files outside the repo (e.g. /etc, /system,
     /usr, other users' homes, ~/Downloads, ~/Documents).
   - Modify system configuration or other projects.
-  - Run destructive commands (see blocklist below).
+  - Run destructive commands (see security/blocklist.txt).
   - Leave the repo working tree in a broken state.
 
 ## Destructive command blocklist (never run, even if asked)
-rm -rf / , rm -rf ~ , rm -rf .* outside repo , git push --force ,
-git reset --hard HEAD , git clean -fd ,
-dd if= , mkfs , format , shutdown , reboot , DROP DATABASE ,
-:(){ :|:& };: , > /dev/sda , chmod -R 777 /
+# Source of truth: security/blocklist.txt
+# Includes: rm -rf /, git push --force, dd of=, mkfs, fork bombs,
+# chmod -R 777 /, system shutdown, and more.
 
 ## Safety workflow
 1. Before any large/structural change: create a checkpoint

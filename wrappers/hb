@@ -1,5 +1,6 @@
 #!/bin/sh
-# hb / hb-auto / hb doctor — Hermes autonomous wrapper (equiv. Claude Code)
+# hb — Hermes autonomous boundary wrapper
+# Implements project boundary via .hermes.md and safety controls
 # Sem root, sem proot. Termux-native.
 #
 #   hb             -> profile 'autonomous'     (approvals.mode: smart)
@@ -8,7 +9,7 @@
 #   hb -s <stack>  -> aplica template de stack no .hermes.md
 #
 # Em todos: fronteira de projeto (.hermes.md) + checkpoint automático.
-set -e
+set -euo pipefail
 
 HB_HOME="$HOME/.hermes"
 MODE="${HB_MODE:-smart}"
@@ -17,78 +18,99 @@ PROFILE="${HB_PROFILE:-autonomous}"
 # subcomandos do wrapper (não exigem repo)
 case "${1:-}" in
   audit)  exec hb-audit ;;
-esac
-
-# ---- health check -------------------------------------------------------
-if [ "$DOCTOR" = 1 ]; then
+  doctor)
     echo "=== hb doctor ==="
     fail=0
+
+    # Check if hermes is installed
     if command -v hermes >/dev/null 2>&1; then
         echo "[OK] hermes instalado"
     else
         echo "[FAIL] hermes não encontrado"
         fail=1
     fi
+
+    # Check if git is available
     if command -v git >/dev/null 2>&1; then
         echo "[OK] git disponível"
     else
         echo "[FAIL] git ausente"
         fail=1
     fi
-  for p in autonomous autonomous-yolo; do
-    if [ -f "$HB_HOME/profiles/$p/config.yaml" ]; then echo "[OK] profile $p"; else echo "[FAIL] profile $p ausente"; fail=1; fi
-  done
-  # modelo configurado no profile autonomous?
-  grep -q "default:" "$HB_HOME/profiles/autonomous/config.yaml" 2>/dev/null && echo "[OK] modelo definido (autonomous)" || echo "[WARN] modelo não definido no profile autonomous"
-  # dentro de repo?
-  git rev-parse --show-toplevel >/dev/null 2>&1 && echo "[OK] dentro de repo git: $(git rev-parse --show-toplevel)" || echo "[WARN] não está em repo git (hb exigirá)"
-  # .hermes.md presente?
-  [ -f "$(pwd)/.hermes.md" ] && echo "[OK] .hermes.md presente no projeto" || echo "[WARN] .hermes.md ausente (hb criará na 1ª rodada)"
-  # checkpoints habilitados?
-  # Verificação mais tolerante: procura por 'enabled: true' ignorando espaços iniciais e comentários
-  if grep -E '^\s*enabled:\s*true\s*$' "$HB_HOME/profiles/autonomous/config.yaml" 2>/dev/null; then
-    echo "[OK] checkpoints habilitados"
-  else
-    echo "[WARN] checkpoints desligados ou não encontrados"
-  fi
-  # espaço em disco
-  df -h "$HOME" 2>/dev/null | awk 'NR==2{print "[INFO] disco " $5 " usado em " $6}'
-  [ "$fail" = "0" ] && echo "=== STATUS: OK ===" || echo "=== STATUS: PROBLEMAS ENCONTRADOS ==="
-  exit $fail
+
+    # Check profiles exist
+    for p in autonomous autonomous-yolo; do
+        if [ -f "$HB_HOME/profiles/$p/config.yaml" ]; then
+            echo "[OK] profile $p"
+        else
+            echo "[FAIL] profile $p ausente"
+            fail=1
+        fi
+    done
+
+    # Check if model is defined in autonomous profile
+    if grep -q "default:" "$HB_HOME/profiles/autonomous/config.yaml" 2>/dev/null; then
+        echo "[OK] modelo definido (autonomous)"
+    else
+        echo "[WARN] modelo não definido no profile autonomous"
+    fi
+
+    # Check if we're in a git repo (warning only)
+    git rev-parse --show-toplevel >/dev/null 2>&1 && echo "[OK] dentro de repo git: $(git rev-parse --show-toplevel)" || echo "[WARN] não está em repo git (hb exigirá)"
+
+    # Check if .hermes.md exists (warning only)
+    [ -f "$(pwd)/.hermes.md" ] && echo "[OK] .hermes.md presente no projeto" || echo "[WARN] .hermes.md ausente (hb criará na 1ª rodada)"
+
+    # Check if checkpoints are enabled in the selected profile
+    if grep -E '^\s*enabled:\s*true\s*$' "$HB_HOME/profiles/$PROFILE/config.yaml" 2>/dev/null; then
+        echo "[OK] checkpoints habilitados"
+    else
+        echo "[WARN] checkpoints desligados ou não encontrados"
+    fi
+
+    # Disk space info
+    df -h "$HOME" 2>/dev/null | awk 'NR==2{print "[INFO] disco " $5 " usado em " $6}'
+
+    if [ "$fail" -eq 0 ]; then
+        echo "=== STATUS: OK ==="
+    else
+        echo "=== STATUS: PROBLEMAS ENCONTRADOS ==="
+    fi
+    exit $fail
+    ;;
+esac
+
+# Normal operation: require git repo
+PROJECT_ROOT="$(pwd)"
+if ! git -C "$PROJECT_ROOT" rev-parse --show-toplevel >/dev/null 2>&1; then
+    echo "hb: ERRO — não está dentro de um repositório git. Entre no projeto primeiro." >&2
+    exit 1
 fi
 
-# parser de flags
+# Stack argument (optional)
 STACK=""
 while [ $# -gt 0 ]; do
-  case "$1" in
-    -s|--stack) STACK="$2"; shift 2;;
-    *) break;;
-  esac
+    case "$1" in
+        -s|--stack) STACK="$2"; shift 2;;
+        *) break;;
+    esac
 done
-
-PROJECT_ROOT="$(pwd)"
-
-# 1) Fronteira: exigir repo git.
-if ! git -C "$PROJECT_ROOT" rev-parse --show-toplevel >/dev/null 2>&1; then
-  echo "hb: ERRO — não está dentro de um repositório git. Entre no projeto primeiro." >&2
-  exit 1
-fi
 
 # 2) Copia o .hermes.md de fronteira se faltar (regra de projeto nativa do Hermes).
 if [ ! -f "$PROJECT_ROOT/.hermes.md" ]; then
-  SRC="$HB_HOME/PROJECT_RULES_TEMPLATE.md"
-  [ -n "$STACK" ] && [ -f "$HB_HOME/stacks/$STACK.md" ] && SRC="$HB_HOME/stacks/$STACK.md"
-  echo "hb: copiando regras de fronteira ($SRC) para $PROJECT_ROOT/.hermes.md"
-  cp "$SRC" "$PROJECT_ROOT/.hermes.md"
-  echo "hb: revise o .hermes.md e rode hb novamente para começar." >&2
-  exit 0
+    SRC="$HB_HOME/PROJECT_RULES_TEMPLATE.md"
+    [ -n "$STACK" ] && [ -f "$HB_HOME/stacks/$STACK.md" ] && SRC="$HB_HOME/stacks/$STACK.md"
+    echo "hb: copiando regras de fronteira ($SRC) para $PROJECT_ROOT/.hermes.md"
+    cp "$SRC" "$PROJECT_ROOT/.hermes.md"
+    echo "hb: revise o .hermes.md e rode hb novamente para começar." >&2
+    exit 0
 fi
 
 # 3) Checkpoint automático ANTES de iniciar.
 if [ -n "$(git -C "$PROJECT_ROOT" status --porcelain 2>/dev/null)" ]; then
-  echo "hb: working tree sujo — criando stash de checkpoint..."
-  git -C "$PROJECT_ROOT" stash push -m "hb-checkpoint-$(date +%s)" >/dev/null 2>&1 && \
-    echo "hb: stash criado (recupere com: git stash pop)"
+    echo "hb: working tree sujo — criando stash de checkpoint..."
+    git -C "$PROJECT_ROOT" stash push -u -m "hb-checkpoint-$(date +%s)" >/dev/null 2>&1 &&
+        echo "hb: stash criado (recupere com: git stash pop)"
 fi
 
 # 4) Resumo de confirmação (não bloqueia — só informa o alvo).
@@ -106,8 +128,8 @@ EOF
 
 # 5) Sobe o Hermes no profile correspondente, dentro do repo.
 cd "$PROJECT_ROOT"
-if [ "$#" -gt 0 ]; then
-  exec hermes chat --profile "$PROFILE" --checkpoints -q "$*"
+if [ $# -gt 0 ]; then
+    exec hermes chat --profile "$PROFILE" --checkpoints -q "$*"
 else
-  exec hermes chat --profile "$PROFILE" --checkpoints
+    exec hermes chat --profile "$PROFILE" --checkpoints
 fi

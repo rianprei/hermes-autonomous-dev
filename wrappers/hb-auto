@@ -1,17 +1,24 @@
 #!/bin/sh
 # hb-auto — modo Claude Code (approvals OFF, sem prompts).
 # USE APENAS em tarefas confiáveis e repositórios sob seu controle.
-# Requer confirmação explícita: --confirm-i-accept-risks
+# Requer confirmação explícita: --confirm-i-accept-risks (em qualquer posição)
 
-case "$1" in
-  --confirm-i-accept-risks) shift ;;
-  *)
+CONFIRMED=0
+ARGS=""
+
+for arg in "$@"; do
+    case "$arg" in
+        --confirm-i-accept-risks) CONFIRMED=1 ;;
+        *) ARGS="$ARGS \"$arg\"" ;;
+    esac
+done
+
+if [ "$CONFIRMED" -eq 0 ]; then
     echo "⚠️  MODO OFF — SEM APROVAÇÃO — EXECUÇÃO ARBITRÁRIA POSSÍVEL" >&2
     echo "   Use apenas em repositórios que VOCÊ controla e confia." >&2
     echo "   Para confirmar, rode novamente com:" >&2
-    echo "     hb-auto --confirm-i-accept-risks \"seu comando\"" >&2
+    echo "    hb-auto --confirm-i-accept-risks \"seu comando\"" >&2
     exit 1
-    ;;
-esac
+fi
 
-HB_MODE=off HB_PROFILE=autonomous-yolo exec hb "$@"
+eval "HB_MODE=off HB_PROFILE=autonomous-yolo exec hb $ARGS"

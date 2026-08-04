@@ -1,6 +1,8 @@
-# Bundle artifacts
+# Bundle artifacts (except releases/ which are tracked)
 *.tar.gz
 *.sha256
+!releases/*.tar.gz
+!releases/*.sha256
 
 # Hermes state
 .hermes/

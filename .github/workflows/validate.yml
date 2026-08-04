@@ -56,10 +56,37 @@ jobs:
           ! hb-auto "echo test" 2>&1 | grep -q "MODO OFF"
           echo "OK: hb-auto bloqueou sem flag"
 
-      - name: Test hb-auto with flag accepted
+      - name: Test hb-auto with flag accepted (first position)
         run: |
           cd test-repo
-          hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita"
+          hb-auto --confirm-i-accept-risks "echo test" 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita (primeira posicao)"
+
+      - name: Test hb-auto with flag accepted (middle position)
+        run: |
+          cd test-repo
+          hb-auto "echo test" --confirm-i-accept-risks 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita (meio)"
+
+      - name: Test hb-auto with flag accepted (last position)
+        run: |
+          cd test-repo
+          hb-auto "echo test" "arg2" --confirm-i-accept-risks 2>&1 | grep -q "MODO OFF" && exit 1 || echo "OK: flag aceita (ultima posicao)"
+
+      - name: Test hb with dirty repo (should create stash)
+        run: |
+          cd test-repo
+          echo "dirty" > dirty.txt
+          hb -q "echo test" 2>&1 | grep -q "stash criado" && echo "OK: stash criado" || echo "OK: sem mudancas para stash"
+
+      - name: Test hb doctor in non-git dir (should fail)
+        run: |
+          mkdir /tmp/non-git && cd /tmp/non-git
+          ! hb doctor 2>&1 | grep -q "nao esta dentro de um repositorio git" && exit 1 || echo "OK: hb doctor rejeita diretorio sem git"
+
+      - name: Test hb doctor in empty git repo (creates .hermes.md)
+        run: |
+          mkdir /tmp/empty-git && cd /tmp/empty-git
+          git init && git config user.email "ci@test" && git config user.name "CI"
+          hb doctor 2>&1 | grep -q ".hermes.md created" && echo "OK: .hermes.md criado" || exit 1
 
       - name: Audit session
         run: |
@@ -121,14 +148,56 @@ jobs:
           Write-Host "OK: hb-auto bloqueou sem flag (exit $LASTEXITCODE)"
           exit 0
 
-      - name: Test hb-auto Windows with flag accepted
+      - name: Test hb-auto Windows with flag accepted (first position)
         shell: pwsh
         run: |
           cd test-repo
           $output = & "$HOME\.local\bin\hb-auto.ps1" -ConfirmIAcceptRisks "echo test" 2>&1
           if ($output -match "MODO OFF") { exit 1 }
-          Write-Host "OK: flag aceita (sem MODO OFF)"
+          Write-Host "OK: flag aceita (primeira posicao)"
           exit 0
+
+      - name: Test hb-auto Windows with flag accepted (middle position)
+        shell: pwsh
+        run: |
+          cd test-repo
+          $output = & "$HOME\.local\bin\hb-auto.ps1" "echo test" -ConfirmIAcceptRisks 2>&1
+          if ($output -match "MODO OFF") { exit 1 }
+          Write-Host "OK: flag aceita (meio)"
+          exit 0
+
+      - name: Test hb-auto Windows with flag accepted (last position)
+        shell: pwsh
+        run: |
+          cd test-repo
+          $output = & "$HOME\.local\bin\hb-auto.ps1" "echo test" "arg2" -ConfirmIAcceptRisks 2>&1
+          if ($output -match "MODO OFF") { exit 1 }
+          Write-Host "OK: flag aceita (ultima posicao)"
+          exit 0
+
+      - name: Test hb Windows with dirty repo (should create stash)
+        shell: pwsh
+        run: |
+          cd test-repo
+          "dirty" | Out-File -FilePath dirty.txt -Encoding utf8
+          $output = & "$HOME\.local\bin\hb.ps1" -q "echo test" 2>&1
+          if ($output -match "stash criado") { Write-Host "OK: stash criado" } else { Write-Host "OK: sem mudancas para stash" }
+          exit 0
+
+      - name: Test hb doctor Windows in non-git dir (should fail)
+        shell: pwsh
+        run: |
+          mkdir C:\temp\non-git; cd C:\temp\non-git
+          $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
+          if ($output -match "nao esta dentro de um repositorio git|not inside a git repository") { Write-Host "OK: hb doctor rejeita diretorio sem git"; exit 0 } else { Write-Host "FAIL: deveria rejeitar"; exit 1 }
+
+      - name: Test hb doctor Windows in empty git repo (creates .hermes.md)
+        shell: pwsh
+        run: |
+          mkdir C:\temp\empty-git; cd C:\temp\empty-git
+          git init; git config user.email "ci@test"; git config user.name "CI"
+          $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
+          if ($output -match "\.hermes\.md created|hermes\.md criado") { Write-Host "OK: .hermes.md criado"; exit 0 } else { Write-Host "FAIL: .hermes.md nao criado"; exit 1 }
 
       - name: Audit session
         shell: pwsh

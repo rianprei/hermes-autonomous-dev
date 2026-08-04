@@ -6,7 +6,7 @@
 #   hb-install            # instala/atualiza a partir do ~/.hermes atual
 #   hb-install --bundle   # gera tarball portátil em ~/.hermes/hb-bundle.tar.gz
 #   hb-install --from TAR # instala a partir de um bundle
-set -u
+set -eu
 
 HERMES_HOME="${HERMES_HOME:-$HOME/.hermes}"
 BIN_DIR="$HOME/.local/bin"
@@ -17,6 +17,7 @@ mkdir -p "$HERMES_HOME/profiles" "$HERMES_HOME/stacks" "$BIN_DIR"
 case "${1:-}" in
   --bundle)
     echo "hb-install: gerando bundle em $HERMES_HOME/hb-bundle.tar.gz"
+    # Bundle self-contained: profiles, stacks, templates, wrappers, workflow
     tar -czf "$HERMES_HOME/hb-bundle.tar.gz" \
       -C "$HERMES_HOME" \
       profiles/autonomous/config.yaml \
@@ -25,17 +26,34 @@ case "${1:-}" in
       stacks \
       PROJECT_RULES_TEMPLATE.md \
       HERMES_WORKFLOW.md 2>/dev/null
-    tar -czf "$HERMES_HOME/hb-bundle-bin.tar.gz" -C "$BIN_DIR" hb hb-auto hb-prod hb-audit 2>/dev/null
-    echo "hb-install: pronto: $HERMES_HOME/hb-bundle.tar.gz (+ hb-bundle-bin.tar.gz)"
+    # Include wrappers in the same bundle
+    tar -czf "$HERMES_HOME/hb-bundle-wrappers.tar.gz" -C "$BIN_DIR" hb hb-auto hb-prod hb-audit 2>/dev/null || true
+    echo "hb-install: pronto: $HERMES_HOME/hb-bundle.tar.gz (+ wrappers opcional)"
     exit 0
     ;;
   --from)
     BUNDLE="${2:?informe o caminho do tar}"
     echo "hb-install: instalando de $BUNDLE"
-    tar -xzf "$BUNDLE" -C "$HERMES_HOME"
+    # Extract main bundle
+    tar -xzf "$BUNDLE" -C "$HERMES_HOME" || {
+        echo "ERRO: falha ao extrair $BUNDLE" >&2
+        exit 1
+    }
+    # Try to extract wrappers from companion bundle
     bindir="$(dirname "$BUNDLE")"
-    [ -f "$bindir/hb-bundle-bin.tar.gz" ] && tar -xzf "$bindir/hb-bundle-bin.tar.gz" -C "$BIN_DIR"
-    chmod +x "$BIN_DIR"/hb "$BIN_DIR"/hb-auto "$BIN_DIR"/hb-prod "$BIN_DIR"/hb-audit 2>/dev/null
+    if [ -f "$bindir/hb-bundle-wrappers.tar.gz" ]; then
+        tar -xzf "$bindir/hb-bundle-wrappers.tar.gz" -C "$BIN_DIR" || true
+        chmod +x "$BIN_DIR"/hb "$BIN_DIR"/hb-auto "$BIN_DIR"/hb-prod "$BIN_DIR"/hb-audit 2>/dev/null || true
+    else
+        # Fallback: copy wrappers from source if available
+        WRAPPER_DIR="$(dirname "$0")"
+        for w in hb hb-auto hb-prod hb-audit; do
+            if [ -f "$WRAPPER_DIR/$w" ]; then
+                cp "$WRAPPER_DIR/$w" "$BIN_DIR/$w"
+                chmod +x "$BIN_DIR/$w"
+            fi
+        done
+    fi
     echo "hb-install: concluído a partir do bundle."
     exit 0
     ;;

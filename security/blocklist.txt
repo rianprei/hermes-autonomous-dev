@@ -1,0 +1,40 @@
+# Blocklist de comandos perigosos — FONTE ÚNICA
+# Usado por: profiles/*/config.yaml, .hermes.md templates, hb-auto validation
+# Formato: um padrão por linha, regex POSIX extendido
+# Comentários começam com #
+
+# Destruição de sistema de arquivos
+rm\s+-rf\s+/
+rm\s+-rf\s+/etc
+rm\s+-rf\s+/home
+rm\s+-rf\s+/var
+rm\s+-rf\s+/usr
+find\s+/.*-delete
+xargs\s+rm
+dd\s+of=
+shutil\.rmtree\(["\']/
+:\s*\(\s*\)\s*\{\s*:\|\:\&\s*\};:
+while\s+true;\s+do\s+:;?\s*done\s*&
+chmod\s+-R\s+777\s+/
+chown\s+-R\s+root\s+/
+
+# Git perigoso
+git\s+push\s+--force
+git\s+push\s+--force-with-lease
+git\s+push\s+origin\s+\+main
+git\s+push\s+origin\s+\+master
+
+# Dispositivos de bloco
+>\s*/dev/sd[a-z]
+>\s*/dev/nvme[0-9]n[0-9]
+>\s*/dev/mmcblk[0-9]
+mkfs\.
+fdisk
+parted
+diskpart
+
+# Rede/sistema
+systemctl\s+(stop|disable|reboot|poweroff)
+service\s+\w+\s+stop
+iptables\s+-F
+ufw\s+disable

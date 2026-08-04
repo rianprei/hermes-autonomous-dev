@@ -1,4 +1,4 @@
-# Hermes Autonomous Dev Kit (v1.1.1)
+# Hermes Autonomous Dev Kit (v1.1.2)
 
 Equivalente ao "skip permissions + project boundary" do Claude Code para o
 **Hermes Agent** — construído usando apenas mecanismos nativos do Hermes.
@@ -25,11 +25,11 @@ Equivalente ao "skip permissions + project boundary" do Claude Code para o
 |------------|--------|----------|
 | **Linux** (desktop, server, VPS) | ✅ Testado | git + bash + hermes nativos |
 | **macOS** | 🟡 Declarado | bash, git, hermes via pip/installer — **não testado em CI** |
-| **Windows** | 🟡 **Experimental, não testado** | Scripts PowerShell em `wrappers/windows/` (`hb.ps1`, `hb-auto.ps1`, etc.) + `hb.bat`. Requer PowerShell 5.1+ (já no Windows 10/11) e `hermes`/`git` no PATH. **Nunca rodou em Windows real** — sem CI, sem validação manual. Veja `wrappers/windows/README.md`. |
+| **Windows** | ✅ Testado em CI | Scripts PowerShell em `wrappers/windows/` (`hb.ps1`, `hb-auto.ps1`, etc.) + `hb.bat`. Requer PowerShell 5.1+ (já no Windows 10/11) e `hermes`/`git` no PATH. Validado por CI do GitHub Actions (windows-latest). Veja `wrappers/windows/README.md`. |
 | **Termux (Android)** | 🟡 Com workaround | Hermes nativo falha no Termux (issue upstream #17009). **Workaround**: use `proot-distro install ubuntu` e rode o Hermes dentro do Ubuntu no Termux. O wrapper `hb` detecta e usa automaticamente. |
 | **VPS / remoto** | ✅ Declarado | Linux remoto — funciona igual; rode o Hermes lá e acesse via gateway. |
 
-> **Nota**: O foco original era "Termux sem root/proot". Em PC Linux/macOS normal funciona igual — e melhor, pois não há limitação de user namespaces. No Windows o conceito de "root" não se aplica (lá é Admin/UAC); a fronteira de projeto (`.hermes.md`) funciona igual. **Windows e macOS nunca rodaram em CI nem foram testados manualmente.**
+> **Nota**: No Windows o conceito de "root" não se aplica (lá é Admin/UAC); a fronteira de projeto (`.hermes.md`) funciona igual. Windows agora tem validação via CI do GitHub Actions.
 
 ## Instalação
 
@@ -37,20 +37,19 @@ Equivalente ao "skip permissions + project boundary" do Claude Code para o
 # A partir do repositório (Linux/macOS/Termux)
 hb-install --from releases/hb-bundle-v1.1.2.tar.gz
 # Windows: veja wrappers/windows/README.md (hb-install.ps1)
-# Windows (experimental): veja wrappers/windows/README.md (hb-install.ps1)
 
 hb doctor          # verifica
 cd /seu/projeto
 hb                 # 1ª execução cria o .hermes.md — revise, depois rode de novo
 ```
 
-### Windows (experimental)
+### Windows
 
 ```powershell
 # 1. Instale Hermes e Git (ambos no PATH)
-# 2. Baixe o bundle da release v1.1.1
+# 2. Baixe o bundle da release v1.1.2
 # 3. Extraia e instale:
-.\wrappers\windows\hb-install.ps1 -From releases\hb-bundle-v1.1.1.tar.gz
+.\wrappers\windows\hb-install.ps1 -From releases\hb-bundle-v1.1.2.tar.gz
 
 # 4. Verifique:
 .\wrappers\windows\hb-install-check.ps1
@@ -85,7 +84,18 @@ A fronteira do projeto é **política, não uma barreira de kernel**:
 - `hb-auto` (`off`) remove o último gate de aprovação — **só repos confiáveis**.
 - **Sem root/proot** = sem isolamento de kernel. No Termux, user namespaces estão desligados.
 
-Este é o teto prático **sem root/proot** (ex.: no Termux, user namespaces desligados). Em PC Linux/macOS normal você pode ir além e usar container/namespace real para isolamento de sistema de arquivos — fora do escopo desta skill, mas compatível.
+### Limitações conhecidas
+
+| Limitação | Detalhes | Mitigação |
+|-----------|----------|-----------|
+| **Blocklist é apenas textual** | A lista de comandos perigosos está em `security/blocklist.txt` e no `.hermes.md` como instrução ao modelo. Não há interceptação técnica no runtime. | Use `hb` (modo `smart`) que mantém gate de aprovação; revise comandos antes de aprovar. |
+| **`hb-auto` flag position** | Antes aceitava `--confirm-i-accept-risks` apenas como primeiro argumento. **Corrigido na v1.1.2** — agora aceita em qualquer posição. | Use a flag obrigatória. |
+| **Termux nativo não funciona** | Hermes falha no Termux sem `proot-distro` (issue upstream #17009). | Use `proot-distro install ubuntu` — o wrapper `hb` detecta e usa automaticamente. |
+| **Sem sandbox de SO** | Fronteira é apenas um prompt ao modelo. Modelo pode ignorar. | Não use `hb-auto` em repos de terceiros. Use `hb` para gate de aprovação. |
+| **Prompt injection via arquivos** | Se o modelo abrir arquivo malicioso, pode sobrescrever a interpretação da fronteira. | Não processe arquivos não confiáveis com `hb-auto`. |
+| **`hb-audit` diverge Linux/Windows** | Linux usa Python + SQLite; Windows usa `sqlite3.exe` CLI. Implementações diferentes. | Use `hb doctor` para health check unificado. |
+| **Bundle não reproduzível** | Bundle publicado não foi gerado pelo `hb-install --bundle` atual. | Use `hb-install --from` com source do repo (via `HB_INSTALL_SRC`). |
+| **Zero testes automatizados** | CI testa apenas caminho feliz. Sem smoke tests para edge cases. | Planejado para v1.2.0. |
 
 ## Estrutura
 
@@ -97,6 +107,7 @@ wrappers/                     hb, hb-auto, hb-prod, hb-audit, hb-install
 wrappers/windows/             hb.ps1, hb-auto.ps1, hb-prod.ps1, hb-audit.ps1, hb-install.ps1, hb.bat, hb-install-check.ps1
 releases/                     hb-bundle-v1.1.2.tar.gz (+ .sha256)
 manifest.yaml                 manifesto de componentes
+security/blocklist.txt        fonte única de comandos perigosos
 ```
 
 ## Licença

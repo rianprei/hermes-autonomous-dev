@@ -35,3 +35,8 @@ means no prior session row, or the DB schema differs. Check
 That is the Hermes default approval gate (`approvals.mode: manual/smart`)
 protecting destructive commands. Expected behavior — approve or use a safer
 command. This is NOT a bug in `hb`.
+
+## Termux: "Hermes failed to start"
+Hermes nativo falha no Termux (issue upstream #17009). Use:
+`proot-distro install ubuntu` e rode o Hermes dentro do Ubuntu no Termux.
+O wrapper `hb` detecta e usa automaticamente o ambiente proot.
