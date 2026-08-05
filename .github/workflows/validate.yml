@@ -77,10 +77,10 @@ jobs:
           echo "dirty" > dirty.txt
           hb -q "echo test" 2>&1 | grep -q "stash criado" && echo "OK: stash criado" || echo "OK: sem mudancas para stash"
 
-      - name: Test hb doctor in non-git dir (should fail)
+      - name: Test hb doctor in non-git dir (should warn)
         run: |
           mkdir /tmp/non-git && cd /tmp/non-git
-          ! hb doctor 2>&1 | grep -q "nao esta dentro de um repositorio git" && exit 1 || echo "OK: hb doctor rejeita diretorio sem git"
+          hb doctor 2>&1 | grep -q "nao esta em repo git" && echo "OK: hb doctor avisa sem git" || exit 1
 
       - name: Test hb doctor in empty git repo (creates .hermes.md)
         run: |
