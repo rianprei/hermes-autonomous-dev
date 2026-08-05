@@ -5,8 +5,8 @@
 #   hb.ps1 -Stack python   -> apply stack rules (first run)
 #   hb-auto.ps1 "task"     -> off mode (trusted repos only)
 #   hb-prod.ps1 "task"     -> conservative production mode
-#   hb.ps1 doctor          -> health check
-#   hb.ps1 audit           -> last session summary
+#   hb.ps1 doctor          -> health check (also accepts -Doctor)
+#   hb.ps1 audit           -> last session summary (also accepts -Audit)
 #   hb-install.ps1         -> reproduce environment
 #
 # Requirements: Windows 10/11 with PowerShell 5.1+, `hermes` and `git` on PATH.
@@ -24,6 +24,10 @@ $HB_HOME = if ($env:HERMES_HOME) { $env:HERMES_HOME } else { "$HOME\.hermes" }
 $BIN = "$HB_HOME\..\..\.local\bin"   # not used on Windows; hermes is on PATH
 $MODE = if ($env:HB_MODE) { $env:HB_MODE } else { "smart" }
 $PROFILE = if ($env:HB_PROFILE) { $env:HB_PROFILE } else { "autonomous" }
+
+# Also accept positional "doctor" / "audit" in $Rest
+if ($Rest.Count -gt 0 -and $Rest[0] -eq "doctor") { $Doctor = $true; $Rest = $Rest[1..($Rest.Count-1)] }
+if ($Rest.Count -gt 0 -and $Rest[0] -eq "audit")  { $Audit  = $true; $Rest = $Rest[1..($Rest.Count-1)] }
 
 function Test-CommandExists($cmd) {
     return [bool](Get-Command $cmd -ErrorAction SilentlyContinue)
