@@ -190,6 +190,8 @@ jobs:
           mkdir C:\temp\non-git; cd C:\temp\non-git
           $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
           $ec = $LASTEXITCODE
+          Write-Host "DEBUG exit code: $ec"
+          Write-Host "DEBUG output: [$output]"
           if ($ec -ne 0 -and $output -match "repositorio") { Write-Host "OK: hb doctor falha sem git (exit $ec)"; exit 0 } else { Write-Host "FAIL: deveria falhar (exit $ec)"; exit 1 }
 
       - name: Test hb doctor Windows in empty git repo (creates .hermes.md)
