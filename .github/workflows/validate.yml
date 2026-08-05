@@ -86,7 +86,7 @@ jobs:
         run: |
           mkdir /tmp/empty-git && cd /tmp/empty-git
           git init && git config user.email "ci@test" && git config user.name "CI"
-          hb doctor 2>&1 | grep -q ".hermes.md created" && echo "OK: .hermes.md criado" || exit 1
+          hb doctor 2>&1 | grep -q "ausente" && echo "OK: .hermes.md avisado ausente" || exit 1
 
       - name: Audit session
         run: |
@@ -197,7 +197,7 @@ jobs:
           mkdir C:\temp\empty-git; cd C:\temp\empty-git
           git init; git config user.email "ci@test"; git config user.name "CI"
           $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
-          if ($output -match "\.hermes\.md created|hermes\.md criado") { Write-Host "OK: .hermes.md criado"; exit 0 } else { Write-Host "FAIL: .hermes.md nao criado"; exit 1 }
+          if ($output -match "ausente") { Write-Host "OK: .hermes.md avisado ausente"; exit 0 } else { Write-Host "FAIL: .hermes.md nao avisado"; exit 1 }
 
       - name: Audit session
         shell: pwsh
