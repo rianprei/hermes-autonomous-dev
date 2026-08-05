@@ -188,7 +188,7 @@ jobs:
         shell: pwsh
         run: |
           mkdir C:\temp\non-git; cd C:\temp\non-git
-          $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
+          $output = (& "$HOME\.local\bin\hb.ps1" doctor 2>&1)
           $ec = $LASTEXITCODE
           Write-Host "DEBUG exit code: $ec"
           Write-Host "DEBUG output: [$output]"
