@@ -189,7 +189,7 @@ jobs:
         run: |
           mkdir C:\temp\non-git; cd C:\temp\non-git
           $output = & "$HOME\.local\bin\hb.ps1" doctor 2>&1
-          if ($LASTEXITCODE -ne 0 -and $output -match "repositório git") { Write-Host "OK: hb doctor falha sem git"; exit 0 } else { Write-Host "FAIL: deveria falhar"; exit 1 }
+          if ($LASTEXITCODE -ne 0 -and $output -match "repositorio git") { Write-Host "OK: hb doctor falha sem git"; exit 0 } else { Write-Host "FAIL: deveria falhar"; exit 1 }
 
       - name: Test hb doctor Windows in empty git repo (creates .hermes.md)
         shell: pwsh
